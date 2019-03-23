@@ -35,7 +35,7 @@ class RegisterWilcityServiceMenu {
 	}
 
 	public function registerMenu(){
-		add_menu_page('Wilcity Service', 'wilcity-service', 'administrator', 'wilcity-service', array($this, 'settings'), 'dashicons-share-alt');
+		add_menu_page('Wilcity Service', 'Wilcity Service', 'administrator', 'wilcity-service', array($this, 'settings'), 'dashicons-share-alt');
 	}
 
 	private function saveConfiguration(){

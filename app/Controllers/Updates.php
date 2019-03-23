@@ -68,7 +68,7 @@ class Updates {
 			}
 		}
 
-		$this->aResponse = RestApi::get($this->restURL);
+		$this->aResponse = RestApi::get(WILCITYSERVICE_THEME_ENDPOIN);
 		$this->responseCode = isset($this->aResponse['code']) ? $this->aResponse['code'] : 'OKE';
 		if ( $this->aResponse['status'] == 'success' ){
 		    $this->aPlugins = $this->aResponse['aPlugins'];
@@ -281,11 +281,6 @@ class Updates {
         }
 
 	    $this->getListOfInstalledThemes();
-//	    $oListThemesInfo = get_site_transient('update_themes');
-//
-//	    if ( !isset($oListThemesInfo->response) || empty($oListThemesInfo->response) ){
-//		    return false;
-//	    }
 
 	    $oListThemesInfo = new \stdClass();
 	    $oListThemesInfo->response = array();

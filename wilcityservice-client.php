@@ -16,6 +16,7 @@ define('WILCITYSERIVCE_CLIENT_SOURCE', plugin_dir_url(__FILE__) . 'source/');
 define('WILCITYSERIVCE_CLIENT_ASSSETS', plugin_dir_url(__FILE__) . 'assets/');
 define('WILCITYSERIVCE_VERSION', '1.0');
 define('WILCITYSERVICE_PREVIEWURL', 'https://wilcity.com');
+define('WILCITYSERVICE_THEME_ENDPOIN', 'themes/wilcity');
 
 require plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
@@ -27,7 +28,8 @@ function wilcityServiceGetConfigFile($file){
 add_action('wiloke-listing-tools/run-extension', function(){
 	new \WilcityServiceClient\RegisterMenu\RegisterWilcityServiceMenu();
 	new \WilcityServiceClient\Controllers\Updates();
+	new \WilcityServiceClient\Controllers\ScheduleCheckUpdateController();
 }, 999);
 
-//register_activation_hook(__FILE__, array('\WilcityServiceClient\Controllers\ScheduleController', 'checkUpdateSchedule'));
-//register_deactivation_hook(__FILE__, array('\WilcityServiceClient\Controllers\ScheduleController', 'deactivateCheckUpdateSchedule'));
+register_activation_hook(__FILE__, array('\WilcityServiceClient\Controllers\ScheduleCheckUpdateController', 'setupCheckUpdateTwiceDaily'));
+register_deactivation_hook(__FILE__, array('\WilcityServiceClient\Controllers\ScheduleCheckUpdateController', 'clearCheckUpdateTwiceDaily'));
