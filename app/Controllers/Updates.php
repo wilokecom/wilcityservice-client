@@ -424,7 +424,7 @@ class Updates {
 			    <?php elseif (General::isNewVersion($this->aTheme['version'], $this->oCurrentThemeVersion->get('Version'))): ?>
                     <div class="ui basic green button"><a class="wil-update-theme">Update</a></div>
 			    <?php endif; ?>
-                <div class="ui basic red button"><a target="_blank" href="<?php echo esc_url($this->aTheme['url']); ?>">Changelog</a></div>
+                <div class="ui basic red button"><a target="_blank" href="<?php echo esc_url($this->aTheme['preview']); ?>">Changelog</a></div>
             </div>
         </div>
 	    <?php
