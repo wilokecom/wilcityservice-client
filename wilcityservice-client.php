@@ -25,11 +25,9 @@ function wilcityServiceGetConfigFile($file){
 	return $aConfig;
 }
 
-add_action('wiloke-listing-tools/run-extension', function(){
-	new \WilcityServiceClient\RegisterMenu\RegisterWilcityServiceMenu();
-	new \WilcityServiceClient\Controllers\Updates();
-	new \WilcityServiceClient\Controllers\ScheduleCheckUpdateController();
-}, 999);
+new \WilcityServiceClient\RegisterMenu\RegisterWilcityServiceMenu();
+new \WilcityServiceClient\Controllers\Updates();
+new \WilcityServiceClient\Controllers\ScheduleCheckUpdateController();
 
 register_activation_hook(__FILE__, array('\WilcityServiceClient\Controllers\ScheduleCheckUpdateController', 'setupCheckUpdateTwiceDaily'));
 register_deactivation_hook(__FILE__, array('\WilcityServiceClient\Controllers\ScheduleCheckUpdateController', 'clearCheckUpdateTwiceDaily'));

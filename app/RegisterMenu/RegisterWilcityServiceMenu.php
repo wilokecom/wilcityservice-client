@@ -3,9 +3,7 @@
 namespace WilcityServiceClient\RegisterMenu;
 
 
-use WilokeListingTools\Framework\Helpers\GetSettings;
-use WilokeListingTools\Framework\Helpers\SemanticUi;
-use WilokeListingTools\Framework\Helpers\SetSettings;
+use WilcityServiceClient\Helpers\SemanticUi;
 
 class RegisterWilcityServiceMenu {
 	public static $optionKey = 'wilcityservice_client';
@@ -25,9 +23,9 @@ class RegisterWilcityServiceMenu {
 		if ( !$this->isWilcityServiceArea() ){
 			return false;
 		}
-		wp_register_style('semantic-ui', WILOKE_LISTING_TOOL_URL . 'admin/assets/semantic-ui/form.min.css');
+		wp_register_style('semantic-ui', WILCITYSERIVCE_CLIENT_ASSSETS . 'semantic-ui/form.min.css');
 		wp_enqueue_style('semantic-ui');
-		wp_register_script('semantic-ui', WILOKE_LISTING_TOOL_URL . 'admin/assets/semantic-ui/semantic.min.js', array('jquery'), null, true);
+		wp_register_script('semantic-ui', WILCITYSERIVCE_CLIENT_ASSSETS . 'semantic-ui/semantic.min.js', array('jquery'), null, true);
 		wp_enqueue_script('semantic-ui');
 
 
@@ -50,14 +48,15 @@ class RegisterWilcityServiceMenu {
 				$aOptions[$key] = sanitize_text_field($val);
 			}
 
-			SetSettings::setOptions(self::$optionKey, $aOptions);
+			update_option(self::$optionKey, $aOptions);
 		}
 	}
 
 	public function settings(){
 		$this->saveConfiguration();
 		$aConfiguration = wilcityServiceGetConfigFile('settings');
-		$aValues = GetSettings::getOptions(self::$optionKey);
+		$aValues = get_option(self::$optionKey);
+		$aValues = maybe_unserialize($aValues);
 		?>
 		<form action="<?php echo admin_url('admin.php?page=wilcity-service&is-refresh-update=yes'); ?>" method="POST" class="form ui" style="margin-top: 20px;">
 			<?php

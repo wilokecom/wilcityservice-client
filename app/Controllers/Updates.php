@@ -3,7 +3,6 @@ namespace WilcityServiceClient\Controllers;
 
 use function Sodium\compare;
 use WilcityServiceClient\Helpers\General;
-use WilcityServiceClient\Helpers\GetSettings;
 use WilcityServiceClient\Helpers\RestApi;
 
 class Updates {
@@ -47,7 +46,7 @@ class Updates {
 
 	public function clearUpdatePluginTransients(){
 		global $pagenow;
-		if ( ($pagenow == 'plugins.php' || $pagenow == 'network-plugins.php') && !General::isWilcityServicePage() ){
+		if ( ($pagenow == 'plugins.php' || $pagenow == 'network-plugins.php' || $pagenow == 'update-core.php' || $pagenow == 'network-update-core.php') && !General::isWilcityServicePage() ){
 			if ( get_option('wiloke_clear_update_plugins') ){
 				delete_site_transient('update_plugins');
 				delete_option('wiloke_clear_update_plugins');
@@ -146,7 +145,6 @@ class Updates {
 		return false;
 	}
 
-
 	/*
 	 * Updating Wilcity Plugins To List of Updated Plugins
 	 */
@@ -162,16 +160,25 @@ class Updates {
 		$this->getListOfInstalledPlugins();
 
 		$hasUpdate = false;
+		$oUpdatesPlugins = get_site_transient('update_plugins');
 
 		foreach ( $this->aInstalledPlugins as $file => $aPlugin ){
 			if ( !isset($this->aPlugins[$file]) || empty($this->aPlugins[$file]) ){
-				$oListPluginsInfo->checked[$file] = $aPlugin['Version'];
-				$oListPluginsInfo->response[$file] = $aPlugin;
+			    if ( isset($oUpdatesPlugins->checked) && isset($oUpdatesPlugins->checked[$file]) ){
+				    $oListPluginsInfo->checked[$file]  = $oUpdatesPlugins->checked[$file];
+				    if ( isset($oUpdatesPlugins->response) && is_array($oUpdatesPlugins->response) ){
+				        if ( isset($oUpdatesPlugins->response[$file]) ){
+					        $oListPluginsInfo->response[$file]  = $oUpdatesPlugins->response[$file];
+                        }
+                    }
+                }else{
+				    $oListPluginsInfo->checked[$file] = $aPlugin['Version'];
+                }
 			}else{
 				if ( !isset($oListPluginsInfo->checked[$file]) || version_compare( $aPlugin['Version'], $this->aPlugins[$file]['version'], '<' ) ){
 					$oListPluginsInfo->response[$file] = $this->buildUpdatePluginSkeleton($this->aPlugins[$file]);
-					$hasUpdate = true;
 					$oListPluginsInfo->checked[$file] = $this->aInstalledPlugins[$file]['Version'];
+					$hasUpdate = true;
 				}
 			}
 		}
@@ -190,26 +197,27 @@ class Updates {
 		}
 
 		$oMyTheme = wp_get_theme($this->aTheme['slug']);
+
 		if ( !$oMyTheme->exists() ){
 			return false;
 		}
 
-		$this->getListOfInstalledThemes();
+		if ( version_compare($oMyTheme->get('Version'), $this->aTheme['slug'], '<') ){
+			$oListThemesInfo = new \stdClass();
+			$oListThemesInfo->response = array();
+			$oListThemesInfo->checked = array();
 
-		$oListThemesInfo = new \stdClass();
-		$oListThemesInfo->response = array();
-		$oListThemesInfo->checked = array();
+			$oTheme = new \stdClass();
+			$oTheme->theme      = $this->aTheme['slug'];
+			$oTheme->url        = $this->aTheme['version'];
+			$oTheme->package    = $this->aTheme['download'];
 
-		$oTheme = new \stdClass();
-		$oTheme->theme      = $this->aTheme['slug'];
-		$oTheme->url        = $this->aTheme['version'];
-		$oTheme->package    = $this->aTheme['download'];
+			$oListThemesInfo->response[$this->aTheme['slug']] = $oTheme;
+			$oListThemesInfo->checked[$this->aTheme['slug']]  = $oMyTheme->get('Version');
+			$oListThemesInfo->last_checked = strtotime('+30 minutes');
 
-		$oListThemesInfo->response[$this->aTheme['slug']] = $oTheme;
-		$oListThemesInfo->checked[$this->aTheme['slug']]  = $oMyTheme->get('Version');
-		$oListThemesInfo->last_checked = strtotime('+30 minutes');
-
-		set_site_transient('update_themes', $oListThemesInfo);
+			set_site_transient('update_themes', $oListThemesInfo);
+        }
 	}
 
 	public function checkUpdatePluginDirectly(){
@@ -384,21 +392,12 @@ class Updates {
 		return $oTransient;
 	}
 
-	public function adminHead(){
-		$token = GetSettings::getOptionField('secret_token');
-		?>
-        <script>
-			var WILCITYSERVICE_TOKEN = '<?php echo esc_js($token); ?>'
-        </script>
-		<?php
-	}
-
 	public function enqueueScripts(){
 		if ( !General::isWilcityServicePage() ){
 			return false;
 		}
 
-		wp_enqueue_style( 'style', WILOKE_LISTING_TOOL_URL . 'source/style.css');
+		wp_enqueue_style( 'style', WILCITYSERIVCE_CLIENT_SOURCE . 'style.css');
 		wp_enqueue_script('updates');
 		wp_enqueue_script( 'updateplugin', WILCITYSERIVCE_CLIENT_SOURCE . 'updateplugin.js', array('jquery', 'updates'), WILCITYSERIVCE_VERSION, true );
 	}
