@@ -164,16 +164,16 @@ class Updates {
 
 		foreach ( $this->aInstalledPlugins as $file => $aPlugin ){
 			if ( !isset($this->aPlugins[$file]) || empty($this->aPlugins[$file]) ){
-			    if ( isset($oUpdatesPlugins->checked) && isset($oUpdatesPlugins->checked[$file]) ){
-				    $oListPluginsInfo->checked[$file]  = $oUpdatesPlugins->checked[$file];
-				    if ( isset($oUpdatesPlugins->response) && is_array($oUpdatesPlugins->response) ){
-				        if ( isset($oUpdatesPlugins->response[$file]) ){
-					        $oListPluginsInfo->response[$file]  = $oUpdatesPlugins->response[$file];
-                        }
-                    }
-                }else{
-				    $oListPluginsInfo->checked[$file] = $aPlugin['Version'];
-                }
+				if ( isset($oUpdatesPlugins->checked) && isset($oUpdatesPlugins->checked[$file]) ){
+					$oListPluginsInfo->checked[$file]  = $oUpdatesPlugins->checked[$file];
+					if ( isset($oUpdatesPlugins->response) && is_array($oUpdatesPlugins->response) ){
+						if ( isset($oUpdatesPlugins->response[$file]) ){
+							$oListPluginsInfo->response[$file]  = $oUpdatesPlugins->response[$file];
+						}
+					}
+				}else{
+					$oListPluginsInfo->checked[$file] = $aPlugin['Version'];
+				}
 			}else{
 				if ( !isset($oListPluginsInfo->checked[$file]) || version_compare( $aPlugin['Version'], $this->aPlugins[$file]['version'], '<' ) ){
 					$oListPluginsInfo->response[$file] = $this->buildUpdatePluginSkeleton($this->aPlugins[$file]);
@@ -209,7 +209,7 @@ class Updates {
 
 			$oTheme = new \stdClass();
 			$oTheme->theme      = $this->aTheme['slug'];
-			$oTheme->url        = $this->aTheme['version'];
+			$oTheme->new_version    = $this->aTheme['version'];
 			$oTheme->package    = $this->aTheme['download'];
 
 			$oListThemesInfo->response[$this->aTheme['slug']] = $oTheme;
@@ -217,7 +217,7 @@ class Updates {
 			$oListThemesInfo->last_checked = strtotime('+30 minutes');
 
 			set_site_transient('update_themes', $oListThemesInfo);
-        }
+		}
 	}
 
 	public function checkUpdatePluginDirectly(){
@@ -263,10 +263,10 @@ class Updates {
 	}
 
 	public function getUpdates(){
-		if ( !General::isWilcityServicePage() ){
-			return false;
+		global $pagenow;
+		if ( General::isWilcityServicePage() || ($pagenow == 'plugins.php' || $pagenow == 'network-plugins.php' || $pagenow == 'update-core.php' || $pagenow == 'network-update-core.php') ){
+			$this->_getUpdates();
 		}
-		$this->_getUpdates();
 	}
 
 	private function getListOfInstalledPlugins(){
@@ -354,15 +354,20 @@ class Updates {
 			return $oTransient;
 		}
 
+		if ( empty($this->aTheme) ){
+			return $oTransient;
+		}
+
+
 		if ( isset( $oTransient->checked ) ) {
-			$this->getCurrentTheme( $this->aTheme['slug'] );
+			$this->getCurrentTheme( 'wilcity' );
 			if ( $this->oCurrentThemeVersion && version_compare( $this->oCurrentThemeVersion->get( 'Version' ), $this->aTheme['version'], '<' ) ) {
-				$oTransient->response[ $this->aTheme['slug'] ] = array(
-					'theme'       => $this->aTheme['slug'],
-					'new_version' => $this->aTheme['version'],
-					'url'         => $this->changeLogURL,
-					'package'     => $this->aTheme['download']
-				);
+				$oTheme = new \stdClass();
+				$oTheme->theme      = $this->aTheme['slug'];
+				$oTheme->new_version    = $this->aTheme['version'];
+				$oTheme->package    = $this->aTheme['download'];
+				$oTheme->url    = $this->changeLogURL;
+				$oTransient->response[$this->aTheme['slug']] = $oTheme;
 			}
 		}
 
@@ -402,106 +407,106 @@ class Updates {
 		wp_enqueue_script( 'updateplugin', WILCITYSERIVCE_CLIENT_SOURCE . 'updateplugin.js', array('jquery', 'updates'), WILCITYSERIVCE_VERSION, true );
 	}
 
-public function openUpdateForm(){
-	switch ($this->responseCode){
-		case 'PurchasedCodeExpired':
-			?>
-            <div class="ui message negative">
-                The Support Plan was expired. <a href="https://themeforest.net/item/wilcity-directory-listing-wordpress-theme/22066447" target="_blank">Renew it now</a>
-            </div>
-			<?php
-			break;
-		case 'INVALID_TOKEN':
-			?>
-            <div class="ui message negative">
-                Invalid Token. Please log into <a href="https://wilcityservice.com" target="_blank">Wilcity Service</a> to renew one.
-            </div>
-			<?php
-			break;
-		case 'CLIENT_WEBSITE_IS_INVALID':
-			?>
-            <div class="ui message negative">
-                This website is not listed in Website Urls of this token. Please log into <a href="https://wilcityservice.com" target="_blank">Wilcity Service -> Theme Information</a>  and check it again.
-            </div>
-			<?php
-			break;
-	}
-	?>
-    <div id="wilcity-updates-wrapper" class="ui <?php echo $this->responseCode == 'PurchasedCodeExpired' ? 'disable' : 'oke'; ?>">
-		<?php
-		}
-
-		private function renderThemeButton(){
-			$oActivateTheme = wp_get_theme();
-			?>
-            <div class="extra content">
-                <div class="ui two buttons wil-button-wrapper" data-slug="<?php echo esc_attr($this->aTheme['slug']); ?>">
-					<?php if ( $oActivateTheme->get('name') != $this->oCurrentThemeVersion->get('name') ) : ?>
-                        <div class="ui basic green button">Install</div>
-					<?php elseif (General::isNewVersion($this->aTheme['version'], $this->oCurrentThemeVersion->get('Version'))): ?>
-                        <div class="ui basic green button"><a class="wil-update-theme">Update</a></div>
-					<?php endif; ?>
-                    <div class="ui basic red button"><a target="_blank" href="<?php echo esc_url($this->aTheme['preview']); ?>">Changelog</a></div>
+	public function openUpdateForm(){
+		switch ($this->responseCode){
+			case 'PurchasedCodeExpired':
+				?>
+                <div class="ui message negative">
+                    The Support Plan was expired. <a href="https://themeforest.net/item/wilcity-directory-listing-wordpress-theme/22066447" target="_blank">Renew it now</a>
                 </div>
-            </div>
-			<?php
-		}
-
-		private function renderPluginButtons($aNewPlugin, $aCurrentPluginInfo){
-			?>
-            <div class="extra content">
-                <div class="ui two buttons wil-button-wrapper" data-slug="<?php echo esc_attr($aNewPlugin['slug']); ?>" data-plugin="<?php echo esc_attr($this->buildPluginPathInfo($aNewPlugin['slug'])); ?>">
-					<?php if ( !$aCurrentPluginInfo ) : ?>
-                        <div class="ui basic green button">Install</div>
-					<?php elseif (General::isNewVersion($aNewPlugin['version'], $aCurrentPluginInfo['Version'])): ?>
-                        <div class="ui basic green button"><a class="wil-update-plugin" href="<?php echo esc_url($this->updatechangeLogURL($aNewPlugin['slug'])); ?>">Update</a></div>
-					<?php endif; ?>
-                    <div class="ui basic red button"><a target="_blank" href="<?php echo esc_url($this->getPreviewURL($aNewPlugin)); ?>">Changelog</a></div>
+				<?php
+				break;
+			case 'INVALID_TOKEN':
+				?>
+                <div class="ui message negative">
+                    Invalid Token. Please log into <a href="https://wilcityservice.com" target="_blank">Wilcity Service</a> to renew one.
                 </div>
-            </div>
-			<?php
+				<?php
+				break;
+			case 'CLIENT_WEBSITE_IS_INVALID':
+				?>
+                <div class="ui message negative">
+                    This website is not listed in Website Urls of this token. Please log into <a href="https://wilcityservice.com" target="_blank">Wilcity Service -> Theme Information</a>  and check it again.
+                </div>
+				<?php
+				break;
 		}
-
-		public function showUpTheme(){
-			if ( in_array($this->responseCode, $this->aStatusCodeNoNeedToPrintUpdate) ){
-				return false;
-			}
-			?>
-            <div id="wilcity-update-theme" class="ui segment" style="margin-top: 30px;">
-                <h3 class="ui heading">Wilcity Theme</h3>
-
-                <div class="ui message wil-plugin-update-msg hidden"></div>
-				<?php if ( empty($this->aTheme) ) : ?>
-                    <p class="ui message error positive"><?php echo 'Oops! We could not find this theme.'; ?></p>
-				<?php else: $this->getCurrentTheme( $this->aTheme['slug'] ); ?>
-                    <div class="ui cards" style="margin-bottom: 10px;">
-                        <div class="wil-theme-item-wrapper card" style="width: 300px;">
-                            <div class="content" style="padding: 1.3em 1.2em;">
-                                <img class="right floated mini ui image" style="width: 60px" src="<?php echo esc_url($this->aTheme
-								['thumbnail']); ?>">
-                                <div class="header" style="font-size: 1.1em; margin-bottom: 7px"><?php echo esc_html($this->aTheme['name']); ?></div>
-                                <div class="meta" style="font-size: 13px">
-                                    <span class="version" style=" display: block; margin-bottom: 2px; color: #222">You are using: <span class="wil-current-version"><?php echo esc_html($this->oCurrentThemeVersion->get('Version')); ?></span></span>
-                                    <span class="version" style=" display: block; margin-bottom: 2px; color: #222">New Version: <span class="wil-new-version"><?php echo esc_html($this->aTheme['version']); ?></span></span>
-                                    <span class="updated_at" style=" display: block; color: #222">Updated at:<?php echo date_i18n(get_option('date_format'), $this->aTheme['updatedAt']); ?></span>
-                                </div>
-                                <div class="description" style="font-size: 13px">
-									<?php echo $this->aTheme['description']; ?>
-                                </div>
-                            </div>
-							<?php $this->renderThemeButton(); ?>
-                        </div>
-                    </div>
-				<?php endif; ?>
-            </div>
-			<?php
-		}
-
-		public function closeUpdateForm(){
 		?>
-    </div>
-	<?php
-}
+        <div id="wilcity-updates-wrapper" class="ui <?php echo $this->responseCode == 'PurchasedCodeExpired' ? 'disable' : 'oke'; ?>">
+		<?php
+	}
+
+	private function renderThemeButton(){
+		$oActivateTheme = wp_get_theme();
+		?>
+        <div class="extra content">
+            <div class="ui two buttons wil-button-wrapper" data-slug="<?php echo esc_attr($this->aTheme['slug']); ?>">
+				<?php if ( $oActivateTheme->get('name') != $this->oCurrentThemeVersion->get('name') ) : ?>
+                    <div class="ui basic green button">Install</div>
+				<?php elseif (General::isNewVersion($this->aTheme['version'], $this->oCurrentThemeVersion->get('Version'))): ?>
+                    <div class="ui basic green button"><a class="wil-update-theme">Update</a></div>
+				<?php endif; ?>
+                <div class="ui basic red button"><a target="_blank" href="<?php echo esc_url($this->aTheme['preview']); ?>">Changelog</a></div>
+            </div>
+        </div>
+		<?php
+	}
+
+	private function renderPluginButtons($aNewPlugin, $aCurrentPluginInfo){
+		?>
+        <div class="extra content">
+            <div class="ui two buttons wil-button-wrapper" data-slug="<?php echo esc_attr($aNewPlugin['slug']); ?>" data-plugin="<?php echo esc_attr($this->buildPluginPathInfo($aNewPlugin['slug'])); ?>">
+				<?php if ( !$aCurrentPluginInfo ) : ?>
+                    <div class="ui basic green button">Install</div>
+				<?php elseif (General::isNewVersion($aNewPlugin['version'], $aCurrentPluginInfo['Version'])): ?>
+                    <div class="ui basic green button"><a class="wil-update-plugin" href="<?php echo esc_url($this->updatechangeLogURL($aNewPlugin['slug'])); ?>">Update</a></div>
+				<?php endif; ?>
+                <div class="ui basic red button"><a target="_blank" href="<?php echo esc_url($this->getPreviewURL($aNewPlugin)); ?>">Changelog</a></div>
+            </div>
+        </div>
+		<?php
+	}
+
+	public function showUpTheme(){
+		if ( in_array($this->responseCode, $this->aStatusCodeNoNeedToPrintUpdate) ){
+			return false;
+		}
+		?>
+        <div id="wilcity-update-theme" class="ui segment" style="margin-top: 30px;">
+            <h3 class="ui heading">Wilcity Theme</h3>
+
+            <div class="ui message wil-plugin-update-msg hidden"></div>
+			<?php if ( empty($this->aTheme) ) : ?>
+                <p class="ui message error positive"><?php echo 'Oops! We could not find this theme.'; ?></p>
+			<?php else: $this->getCurrentTheme( $this->aTheme['slug'] ); ?>
+                <div class="ui cards" style="margin-bottom: 10px;">
+                    <div class="wil-theme-item-wrapper card" style="width: 300px;">
+                        <div class="content" style="padding: 1.3em 1.2em;">
+                            <img class="right floated mini ui image" style="width: 60px" src="<?php echo esc_url($this->aTheme
+							['thumbnail']); ?>">
+                            <div class="header" style="font-size: 1.1em; margin-bottom: 7px"><?php echo esc_html($this->aTheme['name']); ?></div>
+                            <div class="meta" style="font-size: 13px">
+                                <span class="version" style=" display: block; margin-bottom: 2px; color: #222">You are using: <span class="wil-current-version"><?php echo esc_html($this->oCurrentThemeVersion->get('Version')); ?></span></span>
+                                <span class="version" style=" display: block; margin-bottom: 2px; color: #222">New Version: <span class="wil-new-version"><?php echo esc_html($this->aTheme['version']); ?></span></span>
+                                <span class="updated_at" style=" display: block; color: #222">Updated at:<?php echo date_i18n(get_option('date_format'), $this->aTheme['updatedAt']); ?></span>
+                            </div>
+                            <div class="description" style="font-size: 13px">
+								<?php echo $this->aTheme['description']; ?>
+                            </div>
+                        </div>
+						<?php $this->renderThemeButton(); ?>
+                    </div>
+                </div>
+			<?php endif; ?>
+        </div>
+		<?php
+	}
+
+	public function closeUpdateForm(){
+		?>
+        </div>
+		<?php
+	}
 
 	public function showUpPlugins(){
 		if ( in_array($this->responseCode, $this->aStatusCodeNoNeedToPrintUpdate) ){
