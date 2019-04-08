@@ -61,8 +61,13 @@ class Updates {
 		if ( !$this->isFocus() ){
 			$this->aResponse = get_transient($this->cacheUpdateKeys);
 			if ( !empty($this->aResponse) ){
-			    $this->aPlugins = $this->aResponse['aPlugins'];
-			    $this->aTheme = $this->aResponse['aTheme'];
+			    if ( $this->aResponse['status'] == 'error' ){
+				    $this->aPlugins = array();
+				    $this->aTheme = array();
+                }else{
+				    $this->aPlugins = $this->aResponse['aPlugins'];
+				    $this->aTheme = $this->aResponse['aTheme'];
+                }
 				$this->responseCode = isset($this->aResponse['code']) ? $this->aResponse['code'] : 'OKE';
 				return $this->aResponse;
 			}

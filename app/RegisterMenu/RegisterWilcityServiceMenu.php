@@ -54,10 +54,19 @@ class RegisterWilcityServiceMenu {
 		}
 	}
 
+	private function fsMethodNotification(){
+	    if ( defined('FS_METHOD') && FS_METHOD !== 'direct' ){
+//	        SemanticUi
+        }
+    }
+
 	public function settings(){
 		$this->saveConfiguration();
 		$aConfiguration = wilcityServiceGetConfigFile('settings');
 		$aValues = GetSettings::getOptions(self::$optionKey);
+
+		do_action('wilcityservice-clients/theme-updates');
+
 		?>
 		<form action="<?php echo admin_url('admin.php?page=wilcity-service&is-refresh-update=yes'); ?>" method="POST" class="form ui" style="margin-top: 20px;">
 			<?php
@@ -114,7 +123,5 @@ class RegisterWilcityServiceMenu {
 			?>
 		</form>
 		<?php
-
-        do_action('wilcityservice-clients/theme-updates');
 	}
 }
