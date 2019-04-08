@@ -1,24 +1,3 @@
-// axios.defaults.headers.common['Authorization'] = WILCITYSERVICE_TOKEN;
-// new Vue({
-// 	el: '#wilcity-update-plugins',
-// 	data: {
-// 		aPlugins: [],
-// 		isFetchingPlugins: ''
-// 	},
-// 	methods:{
-// 		fetchPlugins(){
-// 			axios({
-// 				withCredentials: true,
-// 				method: 'get',
-// 				url: 'https://wilcityservice.com/wp-json/wilokeservice/v1/plugins/wilcity'
-// 			})
-// 			.then(response=>{
-// 				console.log(response);
-// 			});
-// 		}
-// 	}
-// });
-
 (function ($) {
 	'use strict';
 

@@ -357,6 +357,17 @@ class SemanticUi {
 		<?php
 	}
 
+    public static function renderLink($aField){
+		?>
+		<div class="field">
+		    <?php if ( !empty($aField['heading']) ) : ?>
+		    <label><?php echo esc_attr($aField['heading']); ?></label>
+		    <?php endif; ?>
+            <a href="<?php echo esc_url($aField['href']); ?>" target="<?php echo isset($aField['target']) ? esc_attr($aField['target']) : '_self'; ?>" id="<?php echo isset($aField['id']) ? esc_attr($aField['id']) : ''; ?>" class="ui button <?php echo isset($aField['class']) ? esc_attr($aField['class']) : ''; ?>"><?php echo esc_html($aField['name']); ?></a>
+        </div>
+		<?php
+	}
+
     public static function renderButton($aField){
 		?>
 		<div class="field">
