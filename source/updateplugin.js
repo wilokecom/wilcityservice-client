@@ -1,30 +1,9 @@
-// axios.defaults.headers.common['Authorization'] = WILCITYSERVICE_TOKEN;
-// new Vue({
-// 	el: '#wilcity-update-plugins',
-// 	data: {
-// 		aPlugins: [],
-// 		isFetchingPlugins: ''
-// 	},
-// 	methods:{
-// 		fetchPlugins(){
-// 			axios({
-// 				withCredentials: true,
-// 				method: 'get',
-// 				url: 'https://wilcityservice.com/wp-json/wilokeservice/v1/plugins/wilcity'
-// 			})
-// 			.then(response=>{
-// 				console.log(response);
-// 			});
-// 		}
-// 	}
-// });
-
 (function ($) {
 	'use strict';
 
 	$(document).ready(function () {
 		let $bulkUpdateAction = $('#wilcity-updates-wrapper'),
-			$msg = $bulkUpdateAction.find('.wil-plugin-update-msg'),
+			$msg = null,
 			$document = $(document);
 
 		function reUpdateResponse(type) {
@@ -62,6 +41,8 @@
 					$currentVer = $card.find('.wil-current-version'),
 					$newVer = $card.find('.wil-new-version'),
 					$buttonRow = $btn.parents( '.wil-button-wrapper' );
+
+				$msg = $('#wilcity-update-plugins').find('.wil-plugin-update-msg');
 
 				event.preventDefault();
 
@@ -103,6 +84,7 @@
 					$currentVer = $card.find('.wil-current-version'),
 					$newVer = $card.find('.wil-new-version'),
 					$buttonRow = $btn.parents( '.wil-button-wrapper' );
+				$msg = $('#wilcity-update-theme').find('.wil-plugin-update-msg');
 
 				event.preventDefault();
 				if (  $btn.hasClass( 'disable' ) ) {

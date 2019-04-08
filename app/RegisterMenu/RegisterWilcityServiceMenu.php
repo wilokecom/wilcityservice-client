@@ -3,9 +3,7 @@
 namespace WilcityServiceClient\RegisterMenu;
 
 
-use WilokeListingTools\Framework\Helpers\GetSettings;
-use WilokeListingTools\Framework\Helpers\SemanticUi;
-use WilokeListingTools\Framework\Helpers\SetSettings;
+use WilcityServiceClient\Helpers\SemanticUi;
 
 class RegisterWilcityServiceMenu {
 	public static $optionKey = 'wilcityservice_client';
@@ -25,9 +23,9 @@ class RegisterWilcityServiceMenu {
 		if ( !$this->isWilcityServiceArea() ){
 			return false;
 		}
-		wp_register_style('semantic-ui', WILOKE_LISTING_TOOL_URL . 'admin/assets/semantic-ui/form.min.css');
+		wp_register_style('semantic-ui', WILCITYSERIVCE_CLIENT_ASSSETS . 'semantic-ui/form.min.css');
 		wp_enqueue_style('semantic-ui');
-		wp_register_script('semantic-ui', WILOKE_LISTING_TOOL_URL . 'admin/assets/semantic-ui/semantic.min.js', array('jquery'), null, true);
+		wp_register_script('semantic-ui', WILCITYSERIVCE_CLIENT_ASSSETS . 'semantic-ui/semantic.min.js', array('jquery'), null, true);
 		wp_enqueue_script('semantic-ui');
 
 
@@ -35,7 +33,7 @@ class RegisterWilcityServiceMenu {
 	}
 
 	public function registerMenu(){
-		add_menu_page('Wilcity Service', 'wilcity-service', 'administrator', 'wilcity-service', array($this, 'settings'), 'dashicons-share-alt');
+		add_menu_page('Wilcity Service', 'Wilcity Service', 'administrator', 'wilcity-service', array($this, 'settings'), 'dashicons-share-alt');
 	}
 
 	private function saveConfiguration(){
@@ -50,22 +48,28 @@ class RegisterWilcityServiceMenu {
 				$aOptions[$key] = sanitize_text_field($val);
 			}
 
-			SetSettings::setOptions(self::$optionKey, $aOptions);
+			update_option(self::$optionKey, $aOptions);
 		}
 	}
 
 	private function fsMethodNotification(){
 	    if ( defined('FS_METHOD') && FS_METHOD !== 'direct' ){
-//	        SemanticUi
+	        SemanticUi::renderDescField(
+	        	array(
+	        		'desc' => 'Please access to your hosting  by using cPanel or FileZilla -> Open wp-config.php -> Put define("FS_METHOD", "direct"); to this file',
+			        'desc_status' => 'red'
+		        )
+	        );
         }
     }
 
 	public function settings(){
+		$this->fsMethodNotification();
 		$this->saveConfiguration();
 		$aConfiguration = wilcityServiceGetConfigFile('settings');
-		$aValues = GetSettings::getOptions(self::$optionKey);
-
 		do_action('wilcityservice-clients/theme-updates');
+		$aValues = get_option(self::$optionKey);
+		$aValues = maybe_unserialize($aValues);
 
 		?>
 		<form action="<?php echo admin_url('admin.php?page=wilcity-service&is-refresh-update=yes'); ?>" method="POST" class="form ui" style="margin-top: 20px;">
