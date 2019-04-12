@@ -64,7 +64,7 @@ class Updates {
 	}
 
 	private function isFocus(){
-		return (isset($_REQUEST['is-refresh-update']) && $_REQUEST['is-refresh-update'] !== 'yes') || $this->isFocusGetUpdates;
+		return (isset($_REQUEST['is-refresh-update']) && $_REQUEST['is-refresh-update'] == 'yes') || $this->isFocusGetUpdates;
 	}
 
 	private function _getUpdates(){
@@ -208,19 +208,35 @@ class Updates {
 			return false;
 		}
 
-		if ( version_compare($oMyTheme->get('Version'), $this->aTheme['slug'], '<') ){
-			$oListThemesInfo = new \stdClass();
-			$oListThemesInfo->response = array();
-			$oListThemesInfo->checked = array();
+		if ( version_compare($oMyTheme->get('Version'), $this->aTheme['version'], '<') ){
+			if ( class_exists('Jetpack_Frame_Nonce_Preview') ){
+				$oListThemesInfo = new \stdClass();
+				$oListThemesInfo->response = array();
+				$oListThemesInfo->checked = array();
 
-			$oTheme = new \stdClass();
-			$oTheme->theme      = $this->aTheme['slug'];
-			$oTheme->new_version    = $this->aTheme['version'];
-			$oTheme->package    = $this->aTheme['download'];
+				$oTheme = new \stdClass();
+				$oTheme->theme      = $this->aTheme['slug'];
+				$oTheme->new_version    = $this->aTheme['version'];
+				$oTheme->package    = $this->aTheme['download'];
 
-			$oListThemesInfo->response[$this->aTheme['slug']] = $oTheme;
-			$oListThemesInfo->checked[$this->aTheme['slug']]  = $oMyTheme->get('Version');
-			$oListThemesInfo->last_checked = strtotime('+30 minutes');
+				$oListThemesInfo->response[$this->aTheme['slug']] = $oTheme;
+				$oListThemesInfo->checked[$this->aTheme['version']]  = $oMyTheme->get('Version');
+				$oListThemesInfo->last_checked = strtotime('+30 minutes');
+			}else{
+				$oListThemesInfo = new \stdClass();
+				$oListThemesInfo->response = array();
+				$oListThemesInfo->checked = array();
+
+				// $oTheme = new \stdClass();
+				$oTheme['theme']      = $this->aTheme['slug'];
+				$oTheme['new_version']    = $this->aTheme['version'];
+				$oTheme['package']    = $this->aTheme['download'];
+
+				$oListThemesInfo->response[$this->aTheme['slug']] = $oTheme;
+				$oListThemesInfo->checked[$this->aTheme['version']]  = $oMyTheme->get('Version');
+				$oListThemesInfo->last_checked = strtotime('+30 minutes');
+			}
+
 
 			set_site_transient('update_themes', $oListThemesInfo);
 		}
