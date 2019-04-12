@@ -8,6 +8,7 @@ use WilcityServiceClient\Helpers\RestApi;
 class Updates {
 	private $aPlugins;
 	private $aTheme;
+	private $isFocusGetUpdates=false;
 	private $aResponse;
 	private $responseCode;
 	private $aInstalledPlugins;
@@ -63,7 +64,7 @@ class Updates {
 	}
 
 	private function isFocus(){
-		return !isset($_REQUEST['is-refresh-update']) || $_REQUEST['is-refresh-update'] !== 'yes' ? false : true;
+		return (isset($_REQUEST['is-refresh-update']) && $_REQUEST['is-refresh-update'] !== 'yes') || $this->isFocusGetUpdates;
 	}
 
 	private function _getUpdates(){
@@ -342,6 +343,7 @@ class Updates {
 		if ( !current_user_can('administrator') ){
 			return false;
 		}
+		$this->isFocusGetUpdates = true;
 		$this->_getUpdates();
 		$this->directlyUpdateTheme();
 	}
@@ -350,6 +352,7 @@ class Updates {
 		if ( !current_user_can('administrator') ){
 			return false;
 		}
+		$this->isFocusGetUpdates = true;
 		$this->_getUpdates();
 		$this->directlyUpdatePlugins();
 	}

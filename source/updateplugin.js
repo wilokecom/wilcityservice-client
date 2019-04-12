@@ -4,6 +4,7 @@
 	$(document).ready(function () {
 		let $bulkUpdateAction = $('#wilcity-updates-wrapper'),
 			$msg = null,
+			$updatePlugins = $('.wil-update-plugin'),
 			$document = $(document);
 
 		function reUpdateResponse(type) {
@@ -49,7 +50,7 @@
 				if (  $btn.hasClass( 'disable' ) ) {
 					return;
 				}
-
+				$updatePlugins.prop('disabled', true);
 				$card.addClass('ui form loading');
 
 				wp.updates.maybeRequestFilesystemCredentials( event );
@@ -62,15 +63,19 @@
 				} );
 
 				oStatus.fail(response=>{
-					showErrorMsg(response.errorMessage);
+					showErrorMsg(response.errorMessage + ' Please try to click Refresh button then click on Update button again');
 					$card.removeClass('ui form loading');
+					$updatePlugins.prop('disabled', false);
 					reUpdateResponse('plugins');
 				});
 
 				oStatus.done(response=>{
 					$currentVer.html($newVer.html());
 					$card.removeClass('ui form loading');
+					$updatePlugins.prop('disabled', false);
+					reUpdateResponse('plugins');
 					showSuccessMsg('Congratulations! This plugin has been updated successfully');
+					$btn.parent().remove();
 				});
 
 			} );
@@ -92,7 +97,6 @@
 				}
 
 				$card.addClass('ui form loading');
-				// wp.updates.maybeRequestFilesystemCredentials( event );
 				hideMsg();
 
 				let oArgs = _.extend( {
@@ -112,6 +116,7 @@
 				oStatus.done(response=>{
 					$currentVer.html($newVer.html());
 					$card.removeClass('ui form loading');
+					reUpdateResponse('plugins');
 					showSuccessMsg('Congratulations! This plugin has been updated successfully');
 				});
 			})
