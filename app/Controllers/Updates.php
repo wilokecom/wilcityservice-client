@@ -447,7 +447,7 @@ class Updates {
         <div class="extra content">
             <div class="ui two buttons wil-button-wrapper" data-slug="<?php echo esc_attr($this->aTheme['slug']); ?>">
 				<?php if ( $oActivateTheme->get('name') != $this->oCurrentThemeVersion->get('name') ) : ?>
-                    <div class="ui basic green button"><a href="<?php echo esc_url(admin_url('themes.php?page=tgmpa-install-plugins&plugin_status=install')); ?>" target="_blank">Install</a></div>
+                    <div class="ui basic green button"><a href="<?php echo esc_url(admin_url('themes.php')); ?>" target="_blank">Install</a></div>
 				<?php elseif (General::isNewVersion($this->aTheme['version'], $this->oCurrentThemeVersion->get('Version'))): ?>
                     <div class="ui basic green button"><a class="wil-update-theme">Update</a></div>
 				<?php endif; ?>
@@ -462,7 +462,7 @@ class Updates {
         <div class="extra content">
             <div class="ui two buttons wil-button-wrapper" data-slug="<?php echo esc_attr($aNewPlugin['slug']); ?>" data-plugin="<?php echo esc_attr($this->buildPluginPathInfo($aNewPlugin['slug'])); ?>">
 				<?php if ( !$aCurrentPluginInfo ) : ?>
-                    <div class="ui basic green button">Install</div>
+                    <div class="ui basic green button"><a href="<?php echo esc_url(admin_url('themes.php?page=tgmpa-install-plugins&plugin_status=install')); ?>" target="_blank">Install</a></div>
 				<?php elseif (General::isNewVersion($aNewPlugin['version'], $aCurrentPluginInfo['Version'])): ?>
                     <div class="ui basic green button"><a class="wil-update-plugin" href="<?php echo esc_url($this->updatechangeLogURL($aNewPlugin['slug'])); ?>">Update</a></div>
 				<?php endif; ?>
