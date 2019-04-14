@@ -214,10 +214,9 @@ class Updates {
 				$oListThemesInfo->response = array();
 				$oListThemesInfo->checked = array();
 
-				$oTheme = new \stdClass();
-				$oTheme->theme      = $this->aTheme['slug'];
-				$oTheme->new_version    = $this->aTheme['version'];
-				$oTheme->package    = $this->aTheme['download'];
+				$oTheme['theme']      = $this->aTheme['slug'];
+				$oTheme['new_version']    = $this->aTheme['version'];
+				$oTheme['package']    = $this->aTheme['download'];
 
 				$oListThemesInfo->response[$this->aTheme['slug']] = $oTheme;
 				$oListThemesInfo->checked[$this->aTheme['version']]  = $oMyTheme->get('Version');
