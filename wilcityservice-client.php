@@ -3,7 +3,7 @@
  * Plugin Name: Wilcity Service Client
  * Plugin URI: https://wilcityservice.com/
  * Description: Wilcity Service
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Wiloke
  * Author URI: https://wiloke.com
  * Text Domain: wilcityservice
@@ -14,7 +14,7 @@
 
 define('WILCITYSERIVCE_CLIENT_SOURCE', plugin_dir_url(__FILE__) . 'source/');
 define('WILCITYSERIVCE_CLIENT_ASSSETS', plugin_dir_url(__FILE__) . 'assets/');
-define('WILCITYSERIVCE_VERSION', '1.0');
+define('WILCITYSERIVCE_VERSION', '1.0.2');
 define('WILCITYSERVICE_PREVIEWURL', 'https://wilcity.com');
 define('WILCITYSERVICE_THEME_ENDPOIN', 'themes/wilcity');
 

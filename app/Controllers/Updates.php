@@ -335,7 +335,7 @@ class Updates {
 			'plugin'        => $this->buildPluginPathInfo($aPlugin['slug']),
 			'new_version'   => $aPlugin['version'],
 			'newVersion'    => $aPlugin['version'],
-			'url'           => $this->changeLogURL,
+			'url'           => isset($aPlugin['changelog']) && !empty($aPlugin['changelog']) ? $aPlugin['changelog'] : $this->changeLogURL,
 			'package'       => $aPlugin['download'],
 			'requires_php'  => $this->phpRequired
 		);
@@ -389,7 +389,7 @@ class Updates {
 				$oTheme->theme      = $this->aTheme['slug'];
 				$oTheme->new_version    = $this->aTheme['version'];
 				$oTheme->package    = $this->aTheme['download'];
-				$oTheme->url    = $this->changeLogURL;
+				$oTheme->url    = isset($this->aTheme['changelog']) && !empty($this->aTheme['changelog']) ? $this->aTheme['changelog'] : $this->changeLogURL;
 				$oTransient->response[$this->aTheme['slug']] = $oTheme;
 			}
 		}
