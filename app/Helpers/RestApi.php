@@ -56,7 +56,7 @@ class RestApi
                 'msg'    => $error
             ];
         } else {
-            if (strpos($response, 'SpamFireWall') !== false) {
+            if (strpos($response, 'FireWall') !== false) {
                 preg_match('/([0-9.]+)/', $response, $aMatches);
                 
                 return [
