@@ -20,59 +20,63 @@ class Updates
     private $changeLogURL = 'https://wiloke.net/themes/changelog/8';
     private $phpRequired = '7.2';
     private $restURL = 'themes/wilcity_test_theme_update';
-    private $aStatusCodeNoNeedToPrintUpdate = ['CLIENT_WEBSITE_IS_INVALID', 'INVALID_TOKEN'];
-
+    private $aStatusCodeNoNeedToPrintUpdate = ['CLIENT_WEBSITE_IS_INVALID', 'INVALID_TOKEN', 'IP_BLOCKED'];
+    public $errMgs = '';
+    
     public function __construct()
     {
         add_action('admin_init', [$this, 'getUpdates'], 1);
-
+        
         add_filter('http_request_args', [$this, 'updateCheck'], 5, 2);
         add_action('wilcityservice-clients/theme-updates', [$this, 'openUpdateForm'], 1);
         add_action('wilcityservice-clients/theme-updates', [$this, 'showUpTheme']);
         add_action('wilcityservice-clients/theme-updates', [$this, 'showUpPlugins'], 20);
         add_action('wilcityservice-clients/theme-updates', [$this, 'closeUpdateForm'], 30);
         add_action('admin_enqueue_scripts', [$this, 'enqueueScripts']);
-
+        
         add_filter('pre_set_site_transient_update_plugins', [$this, 'updatePlugins']);
         add_filter('pre_set_transient_update_plugins', [$this, 'updatePlugins']);
-
+        
         add_filter('pre_set_site_transient_update_themes', [$this, 'updateThemes'], 1, 99999);
         add_filter('pre_set_transient_update_themes', [$this, 'updateThemes'], 1, 99999);
-
+        
         add_action('admin_init', [$this, 'checkUpdatePluginDirectly'], 10);
         add_filter('http_request_args', [$this, 'addBearTokenToHeaderDownload'], 10, 2);
-
+        
         add_action('wp_ajax_wiloke_reupdate_response_of_theme', [$this, 'reUpdateResponseOfTheme']);
         add_action('wp_ajax_wiloke_reupdate_response_of_plugins', [$this, 'reUpdateResponseOfPlugins']);
         add_action('admin_init', [$this, 'clearUpdatePluginTransients'], 1);
     }
-
+    
     public function clearUpdatePluginTransients()
     {
         global $pagenow;
-        if (($pagenow == 'plugins.php' || $pagenow == 'network-plugins.php' || $pagenow == 'update-core.php' || $pagenow == 'network-update-core.php') && !General::isWilcityServicePage()) {
+        if (($pagenow == 'plugins.php' || $pagenow == 'network-plugins.php' || $pagenow == 'update-core.php' ||
+             $pagenow == 'network-update-core.php') && !General::isWilcityServicePage()
+        ) {
             if (get_option('wiloke_clear_update_plugins')) {
                 delete_site_transient('update_plugins');
                 delete_option('wiloke_clear_update_plugins');
             }
         }
     }
-
+    
     public function addBearTokenToHeaderDownload($r, $url)
     {
         if (strpos($url, RestApi::getUpdateServiceURL()) !== false) {
             $r['headers']['authorization'] = RestApi::getBearToken();
             $r['headers']['cache-control'] = 'no';
         }
-
+        
         return $r;
     }
-
+    
     private function isFocus()
     {
-        return (isset($_REQUEST['is-refresh-update']) && $_REQUEST['is-refresh-update'] == 'yes') || $this->isFocusGetUpdates;
+        return (isset($_REQUEST['is-refresh-update']) && $_REQUEST['is-refresh-update'] == 'yes') ||
+               $this->isFocusGetUpdates;
     }
-
+    
     private function _getUpdates()
     {
         if (!$this->isFocus()) {
@@ -81,16 +85,17 @@ class Updates
                 if ($this->aResponse['status'] == 'error') {
                     $this->aPlugins = [];
                     $this->aTheme   = [];
+                    $this->errMgs   = isset($this->aResponse['msg']) ? $this->aResponse['msg'] : '';
                 } else {
                     $this->aPlugins = $this->aResponse['aPlugins'];
                     $this->aTheme   = $this->aResponse['aTheme'];
                 }
                 $this->responseCode = isset($this->aResponse['code']) ? $this->aResponse['code'] : 'OKE';
-
+                
                 return $this->aResponse;
             }
         }
-
+        
         $this->aResponse    = RestApi::get(WILCITYSERVICE_THEME_ENDPOIN);
         $this->responseCode = isset($this->aResponse['code']) ? $this->aResponse['code'] : 'OKE';
         if ($this->aResponse['status'] == 'success') {
@@ -104,10 +109,11 @@ class Updates
             $this->aPlugins            = false;
             $this->aTheme              = false;
             $this->aResponse['status'] = 'error';
+            $this->errMgs              = isset($this->aResponse['msg']) ? $this->aResponse['msg'] : '';
             set_transient($this->cacheUpdateKeys, $this->aResponse, $this->saveUpdateInfoIn * 20);
         }
     }
-
+    
     /**
      * Disables requests to the wp.org repository for Envato Market.
      *
@@ -120,23 +126,23 @@ class Updates
      */
     public function updateCheck($aRequest, $url)
     {
-
+        
         // Plugin update request.
         if (false !== strpos($url, '//api.wordpress.org/plugins/update-check/1.1/')) {
-
+            
             // Decode JSON so we can manipulate the array.
             $oData = json_decode($aRequest['body']['plugins']);
-
+            
             // Remove the Envato Market.
             unset($oData->plugins->{'wilcityservice-client/wilcityservice-client.php'});
-
+            
             // Encode back into JSON and update the response.
             $aRequest['body']['plugins'] = wp_json_encode($oData);
         }
-
+        
         return $aRequest;
     }
-
+    
     /**
      * Check Github for an update.
      *
@@ -150,17 +156,17 @@ class Updates
         if (is_wp_error($raw_response)) {
             return false;
         }
-
+        
         if (!empty($raw_response['body'])) {
             $raw_body = json_decode($raw_response['body'], true);
             if ($raw_body) {
                 return (object)$raw_body;
             }
         }
-
+        
         return false;
     }
-
+    
     /*
      * Updating Wilcity Plugins To List of Updated Plugins
      */
@@ -169,16 +175,16 @@ class Updates
         if (empty($this->aPlugins)) {
             return false;
         }
-
+        
         $oListPluginsInfo           = new \stdClass();
         $oListPluginsInfo->response = [];
         $oListPluginsInfo->checked  = [];
-
+        
         $this->getListOfInstalledPlugins();
-
+        
         $hasUpdate       = false;
         $oUpdatesPlugins = get_site_transient('update_plugins');
-
+        
         foreach ($this->aInstalledPlugins as $file => $aPlugin) {
             if (!isset($this->aPlugins[$file]) || empty($this->aPlugins[$file])) {
                 if (isset($oUpdatesPlugins->checked) && isset($oUpdatesPlugins->checked[$file])) {
@@ -201,7 +207,7 @@ class Updates
                 }
             }
         }
-
+        
         if ($hasUpdate) {
             $oListPluginsInfo->last_checked = strtotime('+30 minutes');
             set_site_transient('update_plugins', $oListPluginsInfo);
@@ -209,60 +215,60 @@ class Updates
             $this->setLastCheckedUpdatePlugins();
         }
     }
-
+    
     public function directlyUpdateTheme()
     {
         if (empty($this->aTheme)) {
             return false;
         }
-
+        
         $oMyTheme = wp_get_theme($this->aTheme['slug']);
-
+        
         if (!$oMyTheme->exists()) {
             return false;
         }
-
+        
         if (version_compare($oMyTheme->get('Version'), $this->aTheme['version'], '<')) {
-            if (class_exists('Jetpack_Frame_Nonce_Preview')) {
-                $oListThemesInfo           = new \stdClass();
-                $oListThemesInfo->response = [];
-                $oListThemesInfo->checked  = [];
-
-                $oTheme['theme']       = $this->aTheme['slug'];
-                $oTheme['new_version'] = $this->aTheme['version'];
-                $oTheme['package']     = $this->aTheme['download'];
-
-                $oListThemesInfo->response[$this->aTheme['slug']]   = $oTheme;
-                $oListThemesInfo->checked[$this->aTheme['version']] = $oMyTheme->get('Version');
-                $oListThemesInfo->last_checked                      = strtotime('+30 minutes');
-            } else {
-                $oListThemesInfo             = new \stdClass();
-                $oListThemesInfo->response = [];
-                $oListThemesInfo->checked  = [];
-
-                $oTheme['theme']       = $this->aTheme['slug'];
-                $oTheme['new_version'] = $this->aTheme['version'];
-                $oTheme['package']     = $this->aTheme['download'];
-
-                $oListThemesInfo->response[$this->aTheme['slug']]   = $oTheme;
-                $oListThemesInfo->checked[$this->aTheme['version']] = $oMyTheme->get('Version');
-                $oListThemesInfo->last_checked                      = strtotime('+30 minutes');
-            }
-
+            //            if (class_exists('Jetpack_Frame_Nonce_Preview')) {
+            //                $oListThemesInfo           = new \stdClass();
+            //                $oListThemesInfo->response = [];
+            //                $oListThemesInfo->checked  = [];
+            //
+            //                $oTheme['theme']       = $this->aTheme['slug'];
+            //                $oTheme['new_version'] = $this->aTheme['version'];
+            //                $oTheme['package']     = $this->aTheme['download'];
+            //
+            //                $oListThemesInfo->response[$this->aTheme['slug']]   = $oTheme;
+            //                $oListThemesInfo->checked[$this->aTheme['version']] = $oMyTheme->get('Version');
+            //                $oListThemesInfo->last_checked                      = strtotime('+30 minutes');
+            //            } else {
+            $oListThemesInfo           = new \stdClass();
+            $oListThemesInfo->response = [];
+            $oListThemesInfo->checked  = [];
+            
+            $oTheme['theme']       = $this->aTheme['slug'];
+            $oTheme['new_version'] = $this->aTheme['version'];
+            $oTheme['package']     = $this->aTheme['download'];
+            
+            $oListThemesInfo->response[$this->aTheme['slug']]   = $oTheme;
+            $oListThemesInfo->checked[$this->aTheme['version']] = $oMyTheme->get('Version');
+            $oListThemesInfo->last_checked                      = strtotime('+30 minutes');
+            //            }
+            
             set_site_transient('update_themes', $oListThemesInfo);
         }
     }
-
+    
     public function checkUpdatePluginDirectly()
     {
         if (!General::isWilcityServicePage() || !$this->isNeededToRecheckUpdatePlugins()) {
             return false;
         }
-
+        
         $this->directlyUpdateTheme();
         $this->directlyUpdatePlugins();
     }
-
+    
     /**
      * API check.
      *
@@ -282,75 +288,78 @@ class Updates
                 $api = $api_check;
             }
         }
-
+        
         return $api;
     }
-
+    
     private function setLastCheckedUpdatePlugins()
     {
         set_transient('wiloke_last_checked_plugins_update', 'yes', 60 * 10);
     }
-
+    
     private function isNeededToRecheckUpdatePlugins()
     {
         if ($this->isFocus()) {
             return true;
         }
         $lastChecked = get_transient('wiloke_last_checked_plugins_update');
-
+        
         return $lastChecked != 'yes' || (defined('WILOKE_FOCUS_CHECKUPDATE') && WILOKE_FOCUS_CHECKUPDATE);
     }
-
+    
     public function getUpdates()
     {
         global $pagenow;
-        if (General::isWilcityServicePage() || ($pagenow == 'plugins.php' || $pagenow == 'network-plugins.php' || $pagenow == 'update-core.php' || $pagenow == 'network-update-core.php')) {
+        if (General::isWilcityServicePage() ||
+            ($pagenow == 'plugins.php' || $pagenow == 'network-plugins.php' || $pagenow == 'update-core.php' ||
+             $pagenow == 'network-update-core.php')
+        ) {
             $this->_getUpdates();
         }
     }
-
+    
     private function getListOfInstalledPlugins()
     {
         if (!empty($this->aInstalledPlugins)) {
             return $this->aInstalledPlugins;
         }
-
+        
         if (!function_exists('get_plugins')) {
             require_once ABSPATH.'wp-admin/includes/plugin.php';
         }
-
+        
         $this->aInstalledPlugins = get_plugins();
-
+        
         return $this->aInstalledPlugins;
     }
-
+    
     private function getListOfInstalledThemes()
     {
         if (!empty($this->aInstalledThemes)) {
             return $this->aInstalledThemes;
         }
-
+        
         $this->aInstalledThemes = wp_get_themes();
-
+        
         return $this->aInstalledThemes;
     }
-
+    
     private function getCurrentTheme($slug)
     {
         if ($this->oCurrentThemeVersion !== null) {
             return $this->oCurrentThemeVersion;
         }
-
+        
         $oMyTheme = wp_get_theme($slug);
         if ($oMyTheme->exists()) {
             $this->oCurrentThemeVersion = false;
         }
-
+        
         $this->oCurrentThemeVersion = $oMyTheme;
-
+        
         return $this->oCurrentThemeVersion;
     }
-
+    
     /*
      * Build Update Skeleton (Referring to response under get_site_transition update_plugins
      */
@@ -361,28 +370,31 @@ class Updates
             'plugin'       => $this->buildPluginPathInfo($aPlugin['slug']),
             'new_version'  => $aPlugin['version'],
             'newVersion'   => $aPlugin['version'],
-            'url'          => isset($aPlugin['changelog']) && !empty($aPlugin['changelog']) ? $aPlugin['changelog'] : $this->changeLogURL,
+            'url'          => isset($aPlugin['changelog']) && !empty($aPlugin['changelog']) ? $aPlugin['changelog'] :
+                $this->changeLogURL,
             'package'      => $aPlugin['download'],
             'requires_php' => $this->phpRequired
         ];
     }
-
+    
     private function getPreviewURL($aNewPlugin)
     {
-        return isset($aNewPlugin['preview']) && !empty($aNewPlugin['preview']) ? $aNewPlugin['preview'] : WILCITYSERVICE_PREVIEWURL;
+        return isset($aNewPlugin['preview']) && !empty($aNewPlugin['preview']) ? $aNewPlugin['preview'] :
+            WILCITYSERVICE_PREVIEWURL;
     }
-
+    
     private function buildPluginPathInfo($pluginID)
     {
         return $pluginID.'/'.$pluginID.'.php';
     }
-
+    
     private function updatechangeLogURL($pluginID)
     {
-        return wp_nonce_url(self_admin_url('update.php?action=upgrade-plugin&plugin=').$this->buildPluginPathInfo($pluginID),
+        return wp_nonce_url(self_admin_url('update.php?action=upgrade-plugin&plugin=').
+                            $this->buildPluginPathInfo($pluginID),
             'upgrade-plugin_'.$this->buildPluginPathInfo($pluginID));
     }
-
+    
     public function reUpdateResponseOfTheme()
     {
         if (!current_user_can('administrator')) {
@@ -392,7 +404,7 @@ class Updates
         $this->_getUpdates();
         $this->directlyUpdateTheme();
     }
-
+    
     public function reUpdateResponseOfPlugins()
     {
         if (!current_user_can('administrator')) {
@@ -402,49 +414,52 @@ class Updates
         $this->_getUpdates();
         $this->directlyUpdatePlugins();
     }
-
+    
     public function updateThemes($oTransient)
     {
         if (General::isWilcityServicePage()) {
             return $oTransient;
         }
-
+        
         if (empty($this->aTheme)) {
             return $oTransient;
         }
-
+        
         if (isset($oTransient->checked)) {
             $this->getCurrentTheme('wilcity');
             if ($this->oCurrentThemeVersion && version_compare($this->oCurrentThemeVersion->get('Version'),
                     $this->aTheme['version'], '<')
             ) {
                 $oTheme                                      = [];
-                $oTheme['theme']                               = $this->aTheme['slug'];
-                $oTheme['new_version']                         = $this->aTheme['version'];
-                $oTheme['package']                             = $this->aTheme['download'];
-                $oTheme['url']                                 = isset($this->aTheme['changelog']) && !empty($this->aTheme['changelog']) ? $this->aTheme['changelog'] : $this->changeLogURL;
+                $oTheme['theme']                             = $this->aTheme['slug'];
+                $oTheme['new_version']                       = $this->aTheme['version'];
+                $oTheme['package']                           = $this->aTheme['download'];
+                $oTheme['url']                               =
+                    isset($this->aTheme['changelog']) && !empty($this->aTheme['changelog']) ?
+                        $this->aTheme['changelog'] : $this->changeLogURL;
                 $oTransient->response[$this->aTheme['slug']] = $oTheme;
             }
         }
-
+        
         return $oTransient;
     }
-
+    
     public function updatePlugins($oTransient)
     {
         if (General::isWilcityServicePage()) {
             return $oTransient;
         }
-
+        
         if (isset($oTransient->checked) || $isDebug = true) {
             // send purchased code
             if (empty($this->aPlugins) || is_wp_error($this->aPlugins)) {
                 return $oTransient;
             }
-
+            
             foreach ($this->aPlugins as $aPlugin) {
                 $path = $this->buildPluginPathInfo($aPlugin['slug']);
-                if (isset($this->aInstalledPlugins[$path]) && version_compare($this->aInstalledPlugins[$path]['Version'],
+                if (isset($this->aInstalledPlugins[$path]) &&
+                    version_compare($this->aInstalledPlugins[$path]['Version'],
                         $aPlugin['version'], '<')
                 ) {
                     $oTransient->response[$path] = $this->buildUpdatePluginSkeleton($aPlugin);
@@ -452,25 +467,32 @@ class Updates
             }
             $this->setLastCheckedUpdatePlugins();
         }
-
+        
         return $oTransient;
     }
-
+    
     public function enqueueScripts()
     {
         if (!General::isWilcityServicePage()) {
             return false;
         }
-
+        
         wp_enqueue_style('style', WILCITYSERIVCE_CLIENT_SOURCE.'style.css');
         wp_enqueue_script('updates');
         wp_enqueue_script('updateplugin', WILCITYSERIVCE_CLIENT_SOURCE.'updateplugin.js', ['jquery', 'updates'],
             WILCITYSERIVCE_VERSION, true);
     }
-
+    
     public function openUpdateForm()
     {
         switch ($this->responseCode) {
+            case 'IP_BLOCKED':
+                ?>
+                <div class="ui message negative">
+                    <?php echo $this->errMgs; ?>
+                </div>
+                <?php
+                break;
             case 'PurchasedCodeExpired':
                 ?>
                 <div class="ui message negative">
@@ -499,10 +521,11 @@ class Updates
                 break;
         }
         ?>
-        <div id="wilcity-updates-wrapper" class="ui <?php echo $this->responseCode == 'PurchasedCodeExpired' ? 'disable' : 'oke'; ?>">
+        <div id="wilcity-updates-wrapper" class="ui <?php echo $this->responseCode == 'PurchasedCodeExpired' ?
+        'disable' : 'oke'; ?>">
         <?php
     }
-
+    
     private function renderThemeButton()
     {
         $oActivateTheme = wp_get_theme();
@@ -524,7 +547,7 @@ class Updates
         </div>
         <?php
     }
-
+    
     private function renderPluginButtons($aNewPlugin, $aCurrentPluginInfo)
     {
         ?>
@@ -547,7 +570,7 @@ class Updates
         </div>
         <?php
     }
-
+    
     public function showUpTheme()
     {
         if (in_array($this->responseCode, $this->aStatusCodeNoNeedToPrintUpdate)) {
@@ -589,14 +612,14 @@ class Updates
         </div>
         <?php
     }
-
+    
     public function closeUpdateForm()
     {
         ?>
         </div>
         <?php
     }
-
+    
     public function showUpPlugins()
     {
         if (in_array($this->responseCode, $this->aStatusCodeNoNeedToPrintUpdate)) {
@@ -612,7 +635,9 @@ class Updates
                 <div class="ui cards" style="margin-bottom: 10px;">
                     <?php
                     foreach ($this->aPlugins as $aPlugin) :
-                        $aCurrentPluginInfo = isset($this->aInstalledPlugins[$this->buildPluginPathInfo($aPlugin['slug'])]) ? $this->aInstalledPlugins[$this->buildPluginPathInfo($aPlugin['slug'])] : false;
+                        $aCurrentPluginInfo =
+                            isset($this->aInstalledPlugins[$this->buildPluginPathInfo($aPlugin['slug'])]) ?
+                                $this->aInstalledPlugins[$this->buildPluginPathInfo($aPlugin['slug'])] : false;
                         ?>
                         <div class="wil-plugin-wrapper card" style="width: 300px;">
                             <div class="content" style="padding: 1.3em 1.2em;">
