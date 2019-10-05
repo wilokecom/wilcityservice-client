@@ -57,7 +57,8 @@ class RestApi
             ];
         } else {
             if (strpos($response, 'FireWall') !== false) {
-                preg_match('/([0-9.]+)/', $response, $aMatches);
+                $response = strip_tags($response);
+                preg_match('/((\d+\.\d+){3,})/m', $response, $aMatches);
                 
                 return [
                     'status' => 'error',
