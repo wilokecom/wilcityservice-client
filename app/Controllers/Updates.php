@@ -117,12 +117,12 @@ class Updates
     /**
      * Disables requests to the wp.org repository for Envato Market.
      *
-     * @since 1.0.0
-     *
      * @param array  $request An array of HTTP request arguments.
      * @param string $url     The request URL.
      *
      * @return array
+     * @since 1.0.0
+     *
      */
     public function updateCheck($aRequest, $url)
     {
@@ -146,9 +146,9 @@ class Updates
     /**
      * Check Github for an update.
      *
+     * @return false|object
      * @since 1.0.0
      *
-     * @return false|object
      */
     public function api_check()
     {
@@ -199,7 +199,7 @@ class Updates
                 }
             } else {
                 if (!isset($oListPluginsInfo->checked[$file]) || version_compare($aPlugin['Version'],
-                        $this->aPlugins[$file]['version'], '<')
+                    $this->aPlugins[$file]['version'], '<')
                 ) {
                     $oListPluginsInfo->response[$file] = $this->buildUpdatePluginSkeleton($this->aPlugins[$file]);
                     $oListPluginsInfo->checked[$file]  = $this->aInstalledPlugins[$file]['Version'];
@@ -272,13 +272,13 @@ class Updates
     /**
      * API check.
      *
-     * @since 1.0.0
-     *
      * @param bool   $api    Always false.
      * @param string $action The API action being performed.
      * @param object $args   Plugin arguments.
      *
      * @return mixed $api The plugin info or false.
+     * @since 1.0.0
+     *
      */
     public function pluginsAPI($api, $action, $oArgs)
     {
@@ -366,21 +366,21 @@ class Updates
     private function buildUpdatePluginSkeleton($aPlugin)
     {
         return (object)[
-            'slug'         => $aPlugin['slug'],
-            'plugin'       => $this->buildPluginPathInfo($aPlugin['slug']),
-            'new_version'  => $aPlugin['version'],
-            'newVersion'   => $aPlugin['version'],
-            'url'          => isset($aPlugin['changelog']) && !empty($aPlugin['changelog']) ? $aPlugin['changelog'] :
-                $this->changeLogURL,
-            'package'      => $aPlugin['download'],
-            'requires_php' => $this->phpRequired
+          'slug'         => $aPlugin['slug'],
+          'plugin'       => $this->buildPluginPathInfo($aPlugin['slug']),
+          'new_version'  => $aPlugin['version'],
+          'newVersion'   => $aPlugin['version'],
+          'url'          => isset($aPlugin['changelog']) && !empty($aPlugin['changelog']) ? $aPlugin['changelog'] :
+            $this->changeLogURL,
+          'package'      => $aPlugin['download'],
+          'requires_php' => $this->phpRequired
         ];
     }
     
     private function getPreviewURL($aNewPlugin)
     {
         return isset($aNewPlugin['preview']) && !empty($aNewPlugin['preview']) ? $aNewPlugin['preview'] :
-            WILCITYSERVICE_PREVIEWURL;
+          WILCITYSERVICE_PREVIEWURL;
     }
     
     private function buildPluginPathInfo($pluginID)
@@ -392,7 +392,7 @@ class Updates
     {
         return wp_nonce_url(self_admin_url('update.php?action=upgrade-plugin&plugin=').
                             $this->buildPluginPathInfo($pluginID),
-            'upgrade-plugin_'.$this->buildPluginPathInfo($pluginID));
+          'upgrade-plugin_'.$this->buildPluginPathInfo($pluginID));
     }
     
     public function reUpdateResponseOfTheme()
@@ -428,15 +428,15 @@ class Updates
         if (isset($oTransient->checked)) {
             $this->getCurrentTheme('wilcity');
             if ($this->oCurrentThemeVersion && version_compare($this->oCurrentThemeVersion->get('Version'),
-                    $this->aTheme['version'], '<')
+                $this->aTheme['version'], '<')
             ) {
                 $oTheme                                      = [];
                 $oTheme['theme']                             = $this->aTheme['slug'];
                 $oTheme['new_version']                       = $this->aTheme['version'];
                 $oTheme['package']                           = $this->aTheme['download'];
                 $oTheme['url']                               =
-                    isset($this->aTheme['changelog']) && !empty($this->aTheme['changelog']) ?
-                        $this->aTheme['changelog'] : $this->changeLogURL;
+                  isset($this->aTheme['changelog']) && !empty($this->aTheme['changelog']) ?
+                    $this->aTheme['changelog'] : $this->changeLogURL;
                 $oTransient->response[$this->aTheme['slug']] = $oTheme;
             }
         }
@@ -460,7 +460,7 @@ class Updates
                 $path = $this->buildPluginPathInfo($aPlugin['slug']);
                 if (isset($this->aInstalledPlugins[$path]) &&
                     version_compare($this->aInstalledPlugins[$path]['Version'],
-                        $aPlugin['version'], '<')
+                      $aPlugin['version'], '<')
                 ) {
                     $oTransient->response[$path] = $this->buildUpdatePluginSkeleton($aPlugin);
                 }
@@ -480,7 +480,7 @@ class Updates
         wp_enqueue_style('style', WILCITYSERIVCE_CLIENT_SOURCE.'style.css');
         wp_enqueue_script('updates');
         wp_enqueue_script('updateplugin', WILCITYSERIVCE_CLIENT_SOURCE.'updateplugin.js', ['jquery', 'updates'],
-            WILCITYSERIVCE_VERSION, true);
+          WILCITYSERIVCE_VERSION, true);
     }
     
     public function openUpdateForm()
@@ -522,7 +522,7 @@ class Updates
         }
         ?>
         <div id="wilcity-updates-wrapper" class="ui <?php echo $this->responseCode == 'PurchasedCodeExpired' ?
-        'disable' : 'oke'; ?>">
+      'disable' : 'oke'; ?>">
         <?php
     }
     
@@ -536,7 +536,7 @@ class Updates
                     <div class="ui basic green button"><a href="<?php echo esc_url(admin_url('themes.php')); ?>"
                                                           target="_blank">Install</a></div>
                 <?php elseif (General::isNewVersion($this->aTheme['version'],
-                    $this->oCurrentThemeVersion->get('Version'))
+                  $this->oCurrentThemeVersion->get('Version'))
                 ): ?>
                     <div class="ui basic green button"><a class="wil-update-theme">Update</a></div>
                 <?php endif; ?>
@@ -550,22 +550,50 @@ class Updates
     
     private function renderPluginButtons($aNewPlugin, $aCurrentPluginInfo)
     {
+        $tgmpaUrl = admin_url('themes.php?page=tgmpa-install-plugins&plugin_status=install');
         ?>
         <div class="extra content">
-            <div class="ui two buttons wil-button-wrapper" data-slug="<?php echo esc_attr($aNewPlugin['slug']); ?>"
-                 data-plugin="<?php echo esc_attr($this->buildPluginPathInfo($aNewPlugin['slug'])); ?>">
+            <?php wp_nonce_field('wiloke-service-nonce', 'wiloke-service-nonce-value'); ?>
+            <div class="ui two buttons wil-button-wrapper">
                 <?php if (!$aCurrentPluginInfo) : ?>
-                    <div class="ui basic green button"><a
-                                href="<?php echo esc_url(admin_url('themes.php?page=tgmpa-install-plugins&plugin_status=install')); ?>"
-                                target="_blank">Install</a></div>
+                    <div class="ui basic green button">
+                        <a href="<?php echo esc_url($tgmpaUrl); ?>"
+                           class="wil-install-plugin wilcity-plugin"
+                           data-slug="<?php echo esc_attr($aNewPlugin['slug']); ?>"
+                           data-action="wiloke_download_plugin"
+                           data-plugin="<?php echo esc_attr($this->buildPluginPathInfo($aNewPlugin['slug'])); ?>"
+                           target="_blank">Install</a>
+                    </div>
                 <?php elseif (General::isNewVersion($aNewPlugin['version'], $aCurrentPluginInfo['Version'])): ?>
-                    <div class="ui basic green button"><a class="wil-update-plugin"
-                                                          href="<?php echo esc_url($this->updatechangeLogURL($aNewPlugin['slug'])); ?>">Update</a>
+                    <div class="ui basic green button">
+                        <a class="wil-update-plugin"
+                           href="<?php echo esc_url($this->updatechangeLogURL($aNewPlugin['slug'])); ?>">Update</a>
+                    </div>
+                <?php else: ?>
+                    <?php if (!is_plugin_active($this->buildPluginPathInfo($aNewPlugin['slug']))) : ?>
+                        <div class="ui basic green button">
+                            <a href="<?php echo esc_url($tgmpaUrl); ?>"
+                               class="wil-active-plugin wilcity-plugin"
+                               data-action="wiloke_activate_plugin"
+                               data-slug="<?php echo esc_attr($aNewPlugin['slug']); ?>"
+                               data-plugin="<?php echo esc_attr($this->buildPluginPathInfo($aNewPlugin['slug'])); ?>"
+                               target="_blank">Activate</a>
+                        </div>
+                    <?php else: ?>
+                        <div class="ui basic green button">
+                            <a href="<?php echo esc_url($tgmpaUrl); ?>"
+                               class="wil-deactivate-plugin wilcity-plugin"
+                               data-action="wiloke_deactivate_plugin"
+                               data-slug="<?php echo esc_attr($aNewPlugin['slug']); ?>"
+                               data-plugin="<?php echo esc_attr($this->buildPluginPathInfo($aNewPlugin['slug'])); ?>"
+                               target="_blank">Deactivate</a>
+                        </div>
+                    <?php endif; ?>
+                    <div class="ui basic red button">
+                        <a target="_blank"
+                           href="<?php echo esc_url($this->getPreviewURL($aNewPlugin)); ?>">Changelog</a>
                     </div>
                 <?php endif; ?>
-                <div class="ui basic red button"><a target="_blank"
-                                                    href="<?php echo esc_url($this->getPreviewURL($aNewPlugin)); ?>">Changelog</a>
-                </div>
             </div>
         </div>
         <?php
@@ -599,7 +627,7 @@ class Updates
                                             class="wil-new-version"><?php echo esc_html($this->aTheme['version']); ?></span></span>
                                 <span class="updated_at"
                                       style=" display: block; color: #222">Updated at:<?php echo date_i18n(get_option('date_format'),
-                                        $this->aTheme['updatedAt']); ?></span>
+                                      $this->aTheme['updatedAt']); ?></span>
                             </div>
                             <div class="description" style="font-size: 13px">
                                 <?php echo $this->aTheme['description']; ?>
@@ -636,8 +664,8 @@ class Updates
                     <?php
                     foreach ($this->aPlugins as $aPlugin) :
                         $aCurrentPluginInfo =
-                            isset($this->aInstalledPlugins[$this->buildPluginPathInfo($aPlugin['slug'])]) ?
-                                $this->aInstalledPlugins[$this->buildPluginPathInfo($aPlugin['slug'])] : false;
+                          isset($this->aInstalledPlugins[$this->buildPluginPathInfo($aPlugin['slug'])]) ?
+                            $this->aInstalledPlugins[$this->buildPluginPathInfo($aPlugin['slug'])] : false;
                         ?>
                         <div class="wil-plugin-wrapper card" style="width: 300px;">
                             <div class="content" style="padding: 1.3em 1.2em;">
@@ -654,7 +682,7 @@ class Updates
                                                 class="wil-new-version"><?php echo esc_html($aPlugin['version']); ?></span></span>
                                     <span class="updated_at"
                                           style=" display: block; color: #222">Updated at:<?php echo date_i18n(get_option('date_format'),
-                                            $aPlugin['updatedAt']); ?></span>
+                                          $aPlugin['updatedAt']); ?></span>
                                 </div>
                                 <div class="description" style="font-size: 13px">
                                     <?php echo $aPlugin['description']; ?>
