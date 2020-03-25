@@ -1,6 +1,7 @@
 <?php
 namespace WilcityServiceClient\Controllers;
 
+use WilcityServiceClient\Helpers\GetSettings;
 use function Sodium\compare;
 use WilcityServiceClient\Helpers\General;
 use WilcityServiceClient\Helpers\RestApi;
@@ -46,6 +47,9 @@ class Updates
         add_action('wp_ajax_wiloke_reupdate_response_of_theme', [$this, 'reUpdateResponseOfTheme']);
         add_action('wp_ajax_wiloke_reupdate_response_of_plugins', [$this, 'reUpdateResponseOfPlugins']);
         add_action('admin_init', [$this, 'clearUpdatePluginTransients'], 1);
+        
+        add_action('after_switch_theme', [$this, 'afterSwitchTheme']);
+        add_action('activated_plugin', [$this, 'afterActivatePlugin']);
     }
     
     public function clearUpdatePluginTransients()
@@ -698,5 +702,49 @@ class Updates
         <a class="ui button green"
            href="<?php echo self_admin_url('admin.php?page=wilcity-service&is-refresh-update=yes'); ?>">Refresh</a>
         <?php
+    }
+    
+    public function afterActivatePlugin($plugin)
+    {
+        $this->afterSwitchTheme('');
+    }
+    
+    public function afterSwitchTheme($oldThemeName)
+    {
+        $aData  = [];
+        $oTheme = wp_get_theme();
+        
+        $template = $oTheme->get('Template');
+        if (!empty($template) && strtolower($template) === 'wilcity') {
+            $themeName = $template;
+        } else {
+            $themeName = $oTheme->get('Name');
+        }
+        
+        $aData['prevThemeName'] = $oldThemeName;
+        $aData['themeName']     = $themeName;
+        $aData['version']       = $oTheme->get('Version');
+        $aData['email']         = get_option('admin_email');
+        $aData['website']       = home_url('/');
+        
+        $bearToken = 'Bearer '.GetSettings::getOptionField('secret_token');
+        
+        $headers = [
+          'Authorization' => $bearToken,
+          'Content-type'  => 'application/json'
+        ];
+        
+        $pload = [
+          'method'      => 'POST',
+          'timeout'     => 30,
+          'redirection' => 5,
+          'httpversion' => '1.0',
+          'blocking'    => true,
+          'headers'     => $headers,
+          'body'        => $aData,
+          'cookies'     => []
+        ];
+        
+        wp_remote_post('https://wilcityservice.com/wp-json/wilcityservice/v1/switched-t', $pload);
     }
 }
