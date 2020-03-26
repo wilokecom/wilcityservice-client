@@ -727,24 +727,6 @@ class Updates
         $aData['email']         = get_option('admin_email');
         $aData['website']       = home_url('/');
         
-        $bearToken = 'Bearer '.GetSettings::getOptionField('secret_token');
-        
-        $headers = [
-          'Authorization' => $bearToken,
-          'Content-type'  => 'application/json'
-        ];
-        
-        $pload = [
-          'method'      => 'POST',
-          'timeout'     => 30,
-          'redirection' => 5,
-          'httpversion' => '1.0',
-          'blocking'    => true,
-          'headers'     => $headers,
-          'body'        => $aData,
-          'cookies'     => []
-        ];
-        
-        wp_remote_post('https://wilcityservice.com/wp-json/wilcityservice/v1/switched-t', $pload);
+        RestApi::post('switched-t', $aData);
     }
 }

@@ -22,6 +22,20 @@ define('WILCITYSERVICE_DS', '/');
 
 require plugin_dir_path(__FILE__).'vendor/autoload.php';
 
+register_activation_hook(__FILE__, 'wilcityServiceRegisterScheduleHook');
+function wilcityServiceRegisterScheduleHook()
+{
+    if (!wp_next_scheduled('wilcityservice_hourly_event')) {
+        wp_schedule_event(time(), 'hourly', 'wilcityservice_hourly_event');
+    }
+}
+
+register_deactivation_hook(__FILE__, 'wilcityServiceUnRegisterScheduleHook');
+function wilcityServiceUnRegisterScheduleHook()
+{
+    wp_clear_scheduled_hook('wilcityservice_hourly_event');
+}
+
 function wilcityServiceGetConfigFile($file)
 {
     $aConfig = include plugin_dir_path(__FILE__).'configs/'.$file.'.php';
@@ -33,6 +47,7 @@ new \WilcityServiceClient\RegisterMenu\RegisterWilcityServiceMenu();
 new \WilcityServiceClient\Controllers\Updates();
 new \WilcityServiceClient\Controllers\ScheduleCheckUpdateController();
 new \WilcityServiceClient\Controllers\DownloadController();
+new \WilcityServiceClient\Controllers\NotificationController();
 
 register_activation_hook(__FILE__,
   ['\WilcityServiceClient\Controllers\ScheduleCheckUpdateController', 'setupCheckUpdateTwiceDaily']);
