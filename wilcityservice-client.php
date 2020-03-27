@@ -54,3 +54,4 @@ register_deactivation_hook(__FILE__,
   ['\WilcityServiceClient\Controllers\ScheduleCheckUpdateController', 'clearCheckUpdateTwiceDaily']);
 
 do_action('wilcity-service-loaded');
+
