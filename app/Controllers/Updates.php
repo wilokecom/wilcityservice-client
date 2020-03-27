@@ -377,6 +377,10 @@ class Updates
           'url'          => isset($aPlugin['changelog']) && !empty($aPlugin['changelog']) ? $aPlugin['changelog'] :
             $this->changeLogURL,
           'package'      => $aPlugin['download'],
+          'productType'  => isset($aPlugin['productType']) && !empty($aPlugin['productType']) ?
+            $aPlugin['productType'] : 'free',
+          'productUrl'   => isset($aPlugin['productUrl']) && !empty($aPlugin['productUrl']) ?
+            $aPlugin['purchaseUrl'] : '',
           'requires_php' => $this->phpRequired
         ];
     }
@@ -672,9 +676,22 @@ class Updates
                             $this->aInstalledPlugins[$this->buildPluginPathInfo($aPlugin['slug'])] : false;
                         ?>
                         <div class="wil-plugin-wrapper card" style="width: 300px;">
+                            <?php
+                            $productType = isset($aPlugin['productType']) ? $aPlugin['productType'] : 'Free';
+                            ?>
+                            <div class="wil-top" style="padding: 10px; color: red; font-weight: 800">
+                                <span class="product-type"><?php echo ucfirst($productType); ?></span>
+                                <?php
+                                if (!$aCurrentPluginInfo && !empty($aPlugin['productUrl'])) :
+                                    ?>
+                                    <a class="buy-now" href="<?php echo esc_url($aPlugin['productUrl']); ?>"
+                                       style="padding: 10px; color: green;
+                                    font-weight: 800" target="_blank">Buy now</a>
+                                <?php endif; ?>
+                            </div>
                             <div class="content" style="padding: 1.3em 1.2em;">
                                 <img class="right floated mini ui image" style="width: 60px"
-                                     src="<?php echo esc_url($aPlugin['thumbnail']); ?>">
+                                     src="<?php echo esc_url($aPlugin['thumbnail']); ?>" alt="Thumbnail"/>
                                 <div class="header"
                                      style="font-size: 1.1em; margin-bottom: 7px"><?php echo esc_html($aPlugin['name']); ?></div>
                                 <div class="meta" style="font-size: 13px">

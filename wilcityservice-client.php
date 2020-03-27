@@ -39,7 +39,6 @@ function wilcityServiceUnRegisterScheduleHook()
 function wilcityServiceGetConfigFile($file)
 {
     $aConfig = include plugin_dir_path(__FILE__).'configs/'.$file.'.php';
-    
     return $aConfig;
 }
 
@@ -53,3 +52,5 @@ register_activation_hook(__FILE__,
   ['\WilcityServiceClient\Controllers\ScheduleCheckUpdateController', 'setupCheckUpdateTwiceDaily']);
 register_deactivation_hook(__FILE__,
   ['\WilcityServiceClient\Controllers\ScheduleCheckUpdateController', 'clearCheckUpdateTwiceDaily']);
+
+do_action('wilcity-service-loaded');
