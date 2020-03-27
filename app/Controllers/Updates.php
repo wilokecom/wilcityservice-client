@@ -50,7 +50,8 @@ class Updates
         
         add_action('after_switch_theme', [$this, 'afterSwitchTheme']);
         add_action('activated_plugin', [$this, 'afterActivatePlugin']);
-//        add_action('admin_init', [$this, 'testHandleStatistic']);
+        add_action('admin_init', [$this, 'focusRequestStatistic']);
+        //        add_action('admin_init', [$this, 'testHandleStatistic']);
     }
     
     public function clearUpdatePluginTransients()
@@ -753,5 +754,26 @@ class Updates
         $aData['website']       = home_url('/');
         
         $status = RestApi::post('switched-t', $aData);
+        
+        if ($status) {
+            update_option('wilcity_service_statistic', true);
+        }
+    }
+    
+    public function focusRequestStatistic()
+    {
+        if (!isset($_REQUEST['page']) || $_REQUEST['page'] !== 'wilcity-service') {
+            return false;
+        }
+        
+        if (!isset($_REQUEST['is-refresh-update']) || $_REQUEST['is-refresh-update'] !== 'yes') {
+            return false;
+        }
+        
+        if (!current_user_can('administrator') || get_option('wilcity_service_statistic')) {
+            return false;
+        }
+        
+        $this->afterSwitchTheme('');
     }
 }
