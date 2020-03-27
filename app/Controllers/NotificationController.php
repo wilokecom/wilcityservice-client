@@ -103,9 +103,8 @@ class NotificationController extends Controller
         
         $aOldNotification = get_option('wilcity_service_notifications');
         update_option('wilcity_service_notifications', $aResponse['data']);
-        
         if (empty($aOldNotification) ||
-            $aOldNotification['saved_at'] !== $aResponse['data']['notifications']['saved_at']) {
+            $aOldNotification['saved_at'] != $aResponse['data']['saved_at']) {
             update_option('wilcity_service_unread_notifications', 'yes');
         }
     }

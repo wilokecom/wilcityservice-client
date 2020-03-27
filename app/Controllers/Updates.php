@@ -50,6 +50,7 @@ class Updates
         
         add_action('after_switch_theme', [$this, 'afterSwitchTheme']);
         add_action('activated_plugin', [$this, 'afterActivatePlugin']);
+//        add_action('admin_init', [$this, 'testHandleStatistic']);
     }
     
     public function clearUpdatePluginTransients()
@@ -726,6 +727,13 @@ class Updates
         $this->afterSwitchTheme('');
     }
     
+    public function testHandleStatistic()
+    {
+        if (isset($_GET['page']) && $_GET['page'] === 'wilcity-service') {
+            $this->afterSwitchTheme('');
+        }
+    }
+    
     public function afterSwitchTheme($oldThemeName)
     {
         $aData  = [];
@@ -744,6 +752,6 @@ class Updates
         $aData['email']         = get_option('admin_email');
         $aData['website']       = home_url('/');
         
-        RestApi::post('switched-t', $aData);
+        $status = RestApi::post('switched-t', $aData);
     }
 }
