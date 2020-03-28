@@ -3,7 +3,7 @@
  * Plugin Name: Wilcity Service Client
  * Plugin URI: https://wilcityservice.com/
  * Description: Wilcity Service
- * Version: 1.0.5
+ * Version: 1.1
  * Author: Wiloke
  * Author URI: https://wiloke.com
  * Text Domain: wilcityservice
@@ -15,7 +15,7 @@
 define('WILCITYSERIVCE_CLIENT_DIR', plugin_dir_path(__FILE__));
 define('WILCITYSERIVCE_CLIENT_SOURCE', plugin_dir_url(__FILE__).'source/');
 define('WILCITYSERIVCE_CLIENT_ASSSETS', plugin_dir_url(__FILE__).'assets/');
-define('WILCITYSERIVCE_VERSION', '1.0.4');
+define('WILCITYSERIVCE_VERSION', '1.1');
 define('WILCITYSERVICE_PREVIEWURL', 'https://wilcity.com');
 define('WILCITYSERVICE_THEME_ENDPOIN', 'themes/wilcity');
 define('WILCITYSERVICE_DS', '/');
@@ -36,10 +36,12 @@ function wilcityServiceUnRegisterScheduleHook()
     wp_clear_scheduled_hook('wilcityservice_hourly_event');
 }
 
-function wilcityServiceGetConfigFile($file)
-{
-    $aConfig = include plugin_dir_path(__FILE__).'configs/'.$file.'.php';
-    return $aConfig;
+if (function_exists('wilcityServiceGetConfigFile')) {
+	function wilcityServiceGetConfigFile($file)
+	{
+	    $aConfig = include plugin_dir_path(__FILE__).'configs/'.$file.'.php';
+	    return $aConfig;
+	}
 }
 
 new \WilcityServiceClient\RegisterMenu\RegisterWilcityServiceMenu();
