@@ -60,7 +60,7 @@ class RestApi
         $response = curl_exec($curl);
         $error    = curl_error($curl);
         curl_close($curl);
-                var_export($response);die;
+        
         if ($error) {
             return [
               'status' => 'error',
