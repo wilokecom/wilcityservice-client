@@ -564,7 +564,9 @@ class Updates
         ?>
         <div class="extra content">
             <?php wp_nonce_field('wiloke-service-nonce', 'wiloke-service-nonce-value'); ?>
-            <div class="ui two buttons wil-button-wrapper">
+            <div class="ui two buttons wil-button-wrapper"
+                 data-slug="<?php echo esc_attr($aNewPlugin['slug']); ?>"
+                 data-plugin="<?php echo esc_attr($this->buildPluginPathInfo($aNewPlugin['slug'])); ?>">
                 <?php if (!$aCurrentPluginInfo) : ?>
                     <div class="ui basic green button">
                         <a href="<?php echo esc_url($tgmpaUrl); ?>"
