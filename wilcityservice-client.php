@@ -23,25 +23,29 @@ define('WILCITYSERVICE_DS', '/');
 require plugin_dir_path(__FILE__).'vendor/autoload.php';
 
 register_activation_hook(__FILE__, 'wilcityServiceRegisterScheduleHook');
-function wilcityServiceRegisterScheduleHook()
-{
-    if (!wp_next_scheduled('wilcityservice_hourly_event')) {
-        wp_schedule_event(time(), 'hourly', 'wilcityservice_hourly_event');
+if (!function_exists('wilcityServiceRegisterScheduleHook')) {
+    function wilcityServiceRegisterScheduleHook()
+    {
+        if (!wp_next_scheduled('wilcityservice_hourly_event')) {
+            wp_schedule_event(time(), 'hourly', 'wilcityservice_hourly_event');
+        }
+    }
+}
+register_deactivation_hook(__FILE__, 'wilcityServiceUnRegisterScheduleHook');
+if (!function_exists('wilcityServiceUnRegisterScheduleHook')) {
+    function wilcityServiceUnRegisterScheduleHook()
+    {
+        wp_clear_scheduled_hook('wilcityservice_hourly_event');
     }
 }
 
-register_deactivation_hook(__FILE__, 'wilcityServiceUnRegisterScheduleHook');
-function wilcityServiceUnRegisterScheduleHook()
-{
-    wp_clear_scheduled_hook('wilcityservice_hourly_event');
-}
-
-if (function_exists('wilcityServiceGetConfigFile')) {
-	function wilcityServiceGetConfigFile($file)
-	{
-	    $aConfig = include plugin_dir_path(__FILE__).'configs/'.$file.'.php';
-	    return $aConfig;
-	}
+if (!function_exists('wilcityServiceGetConfigFile')) {
+    function wilcityServiceGetConfigFile($file)
+    {
+        $aConfig = include plugin_dir_path(__FILE__).'configs/'.$file.'.php';
+        
+        return $aConfig;
+    }
 }
 
 new \WilcityServiceClient\RegisterMenu\RegisterWilcityServiceMenu();
