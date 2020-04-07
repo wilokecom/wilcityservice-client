@@ -382,7 +382,7 @@ class Updates
           'productType'  => isset($aPlugin['productType']) && !empty($aPlugin['productType']) ?
             $aPlugin['productType'] : 'free',
           'productUrl'   => isset($aPlugin['productUrl']) && !empty($aPlugin['productUrl']) ?
-            $aPlugin['purchaseUrl'] : '',
+            $aPlugin['productUrl'] : '',
           'requires_php' => $this->phpRequired
         ];
     }

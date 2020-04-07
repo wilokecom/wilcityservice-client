@@ -45,7 +45,7 @@ class NotificationController extends Controller
     
     private function renderNotification($aNotification)
     {
-        if ($aNotification['status'] === 'disable' || !isset($aNotification['content'])) {
+        if (!isset($aNotification['status']) || $aNotification['status'] === 'disable' || !isset($aNotification['content'])) {
             return false;
         }
         
@@ -96,7 +96,10 @@ class NotificationController extends Controller
     public function fetchNotifications()
     {
         $aResponse = RestApi::get('notifications');
-        if ($aResponse['status'] === '404' || $aResponse['status'] === 'error' || empty($aResponse['data']) ||
+        if ($aResponse['status'] === '404' ||
+            $aResponse['status'] === 'error' ||
+            !isset($aResponse['data']) ||
+            !isset($aResponse['data']['status']) ||
             $aResponse['data']['status'] === 'disable') {
             return false;
         }
