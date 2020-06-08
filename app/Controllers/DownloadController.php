@@ -3,6 +3,7 @@
 namespace WilcityServiceClient\Controllers;
 
 use WilcityServiceClient\Helpers\Download;
+use WilcityServiceClient\Helpers\GetSettings;
 
 class DownloadController
 {
@@ -14,7 +15,30 @@ class DownloadController
         add_action('wp_ajax_wiloke_download_plugin', [$this, 'downloadPlugin']);
         add_action('wp_ajax_wiloke_activate_plugin', [$this, 'activatePlugin']);
         add_action('wp_ajax_wiloke_deactivate_plugin', [$this, 'deactivatePlugin']);
+        add_action('upgrader_package_options', [$this, 'addBearTokenToDownloadURL']);
+        //        add_filter('wp_signature_hosts', [$this, 'addSignatureHosts']);
         $this->setPaths();
+    }
+    
+    public function addBearTokenToDownloadURL($aOptions)
+    {
+        if (isset($aOptions['package']) && strpos($aOptions['package'], WILCITY_UPDATE_PORT) !== false) {
+            $aOptions['package'] = add_query_arg(
+              [
+                'token' => GetSettings::getOptionField('secret_token')
+              ],
+              $aOptions['package']
+            );
+        }
+        
+        return $aOptions;
+    }
+    
+    public function addSignatureHosts($aHosts)
+    {
+        $aHosts[] = 'wilcityservice.com';
+        
+        return $aHosts;
     }
     
     private function setPaths()
@@ -96,6 +120,7 @@ class DownloadController
         
         $downloadEndpoint = Download::downloadPluginUrl($_POST['plugin']);
         $pluginZipFile    = Download::createPluginZipPlaceholder($_POST['plugin']);
+        
         if (!$this->extPath) {
             wp_send_json_error([
               'msg' => 'Error: Could not create extensions folder'

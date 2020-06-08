@@ -55,7 +55,7 @@ class NotificationController extends Controller
             <?php
             if (isset($aNotification['title']) && !empty($aNotification['title'])) :
                 ?>
-                <h3 class="ui heading"><?php echo esc_html($aNotification['title']); ?></h3>
+                <h3 class="ui heading"><?php echo $aNotification['title']; ?></h3>
             <?php endif; ?>
             <p><?php echo $aNotification['content']; ?></p>
         </div>

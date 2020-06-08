@@ -684,7 +684,14 @@ class Updates
                             $productType = isset($aPlugin['productType']) ? $aPlugin['productType'] : 'Free';
                             ?>
                             <div class="wil-top" style="padding: 10px; color: red; font-weight: 800">
-                                <span class="product-type"><?php echo ucfirst($productType); ?></span>
+                                <?php if (!empty($aPlugin['productUrl'])) : ?>
+                                    <span class="product-type"><a target="_blank"
+                                                                  href="<?php echo esc_url($aPlugin['productUrl']);
+                                                                  ?>"><?php echo ucfirst
+                                            ($productType); ?></a></span>
+                                <?php else : ?>
+                                    <span class="product-type"><?php echo ucfirst($productType); ?></span>
+                                <?php endif; ?>
                                 <?php
                                 if (!$aCurrentPluginInfo && !empty($aPlugin['productUrl'])) :
                                     ?>
