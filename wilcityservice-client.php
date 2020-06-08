@@ -3,7 +3,7 @@
  * Plugin Name: Wilcity Service Client
  * Plugin URI: https://wilcityservice.com/
  * Description: Wilcity Service
- * Version: 1.1.4
+ * Version: 1.1.5
  * Author: Wiloke
  * Author URI: https://wiloke.com
  * Text Domain: wilcityservice
@@ -54,6 +54,7 @@ new \WilcityServiceClient\Controllers\Updates();
 new \WilcityServiceClient\Controllers\ScheduleCheckUpdateController();
 new \WilcityServiceClient\Controllers\DownloadController();
 new \WilcityServiceClient\Controllers\NotificationController();
+new \WilcityServiceClient\Controllers\Shortcodes();
 
 register_activation_hook(__FILE__,
   ['\WilcityServiceClient\Controllers\ScheduleCheckUpdateController', 'setupCheckUpdateTwiceDaily']);

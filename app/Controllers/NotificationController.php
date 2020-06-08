@@ -45,11 +45,11 @@ class NotificationController extends Controller
     
     private function renderNotification($aNotification)
     {
-        if (!isset($aNotification['status']) || $aNotification['status'] === 'disable' || !isset($aNotification['content'])) {
+        if (!isset($aNotification['toggle']) || $aNotification['toggle'] === 'disable' || !isset($aNotification['content'])) {
             return false;
         }
         
-        $status = isset($aNotification['status']) ? $aNotification['status'] : 'green';
+        $status = isset($aNotification['status']) ? $aNotification['status'] : '';
         ?>
         <div class="ui message <?php echo esc_attr($status); ?>">
             <?php
@@ -57,7 +57,7 @@ class NotificationController extends Controller
                 ?>
                 <h3 class="ui heading"><?php echo $aNotification['title']; ?></h3>
             <?php endif; ?>
-            <p><?php echo $aNotification['content']; ?></p>
+            <p><?php echo do_shortcode($aNotification['content']); ?></p>
         </div>
         <?php
     }
@@ -69,6 +69,7 @@ class NotificationController extends Controller
         }
         
         $aNotifications = get_option('wilcity_service_notifications');
+
         if (empty($aNotifications)) {
             return false;
         }
@@ -96,15 +97,17 @@ class NotificationController extends Controller
     public function fetchNotifications()
     {
         $aResponse = RestApi::get('notifications');
+       
         if ($aResponse['status'] === '404' ||
             $aResponse['status'] === 'error' ||
             !isset($aResponse['data']) ||
-            !isset($aResponse['data']['status']) ||
-            $aResponse['data']['status'] === 'disable') {
+            !isset($aResponse['data']['toggle']) ||
+            $aResponse['data']['toggle'] === 'disable') {
             return false;
         }
         
         $aOldNotification = get_option('wilcity_service_notifications');
+  
         update_option('wilcity_service_notifications', $aResponse['data']);
         if (empty($aOldNotification) ||
             $aOldNotification['saved_at'] != $aResponse['data']['saved_at']) {
