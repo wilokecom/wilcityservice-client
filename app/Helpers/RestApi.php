@@ -43,7 +43,7 @@ class RestApi
         curl_setopt_array($curl, [
           CURLOPT_URL            => self::$baseURL.$endpoint,
           CURLOPT_RETURNTRANSFER => true,
-          CURLOPT_REFERER        => 'https://expertmap.eu/wilbeta',
+          CURLOPT_REFERER        => home_url('/'),
           CURLOPT_ENCODING       => '',
           CURLOPT_MAXREDIRS      => 10,
           CURLOPT_TIMEOUT        => 30,
