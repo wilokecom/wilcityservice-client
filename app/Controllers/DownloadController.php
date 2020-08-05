@@ -120,7 +120,6 @@ class DownloadController
         
         $downloadEndpoint = Download::downloadPluginUrl($_POST['plugin']);
         $pluginZipFile    = Download::createPluginZipPlaceholder($_POST['plugin']);
-        
         if (!$this->extPath) {
             wp_send_json_error([
               'msg' => 'Error: Could not create extensions folder'
