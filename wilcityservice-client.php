@@ -3,7 +3,7 @@
  * Plugin Name: Wilcity Service Client
  * Plugin URI: https://wilcityservice.com/
  * Description: Wilcity Service
- * Version: 1.1.5
+ * Version: 1.1.6
  * Author: Wiloke
  * Author URI: https://wiloke.com
  * Text Domain: wilcityservice
@@ -11,14 +11,16 @@
  *
  * @package wilcity
  */
+use WilcityServiceClient\Controllers\PluginController;
+use WilcityServiceClient\Controllers\VerifyLicenseController;
 
 define('WILCITYSERIVCE_CLIENT_DIR', plugin_dir_path(__FILE__));
 define('WILCITYSERIVCE_CLIENT_SOURCE', plugin_dir_url(__FILE__).'source/');
 define('WILCITYSERIVCE_CLIENT_ASSSETS', plugin_dir_url(__FILE__).'assets/');
-define('WILCITYSERIVCE_VERSION', '1.1.4');
+define('WILCITYSERIVCE_VERSION', '1.1.6');
 define('WILCITYSERVICE_PREVIEWURL', 'https://wilcity.com');
 define('WILCITYSERVICE_THEME_ENDPOIN', 'themes/wilcity');
-define('WILCITY_UPDATE_PORT', 'wilcityservice.com');
+define('WILCITY_UPDATE_PORT', 'http://localhost:8888/wilcityservice/');
 define('WILCITYSERVICE_DS', '/');
 
 require plugin_dir_path(__FILE__).'vendor/autoload.php';
@@ -30,6 +32,10 @@ if (!function_exists('wilcityServiceRegisterScheduleHook')) {
         if (!wp_next_scheduled('wilcityservice_hourly_event')) {
             wp_schedule_event(time(), 'hourly', 'wilcityservice_hourly_event');
         }
+
+	    if (!wp_next_scheduled('wiloke_service_daily_event')) {
+		    wp_schedule_event(time(), 'daily', 'wiloke_service_daily_event');
+	    }
     }
 }
 register_deactivation_hook(__FILE__, 'wilcityServiceUnRegisterScheduleHook');
@@ -37,6 +43,7 @@ if (!function_exists('wilcityServiceUnRegisterScheduleHook')) {
     function wilcityServiceUnRegisterScheduleHook()
     {
         wp_clear_scheduled_hook('wilcityservice_hourly_event');
+        wp_clear_scheduled_hook('wiloke_service_daily_event');
     }
 }
 
@@ -55,6 +62,8 @@ new \WilcityServiceClient\Controllers\ScheduleCheckUpdateController();
 new \WilcityServiceClient\Controllers\DownloadController();
 new \WilcityServiceClient\Controllers\NotificationController();
 new \WilcityServiceClient\Controllers\Shortcodes();
+new PluginController;
+new VerifyLicenseController;
 
 register_activation_hook(__FILE__,
   ['\WilcityServiceClient\Controllers\ScheduleCheckUpdateController', 'setupCheckUpdateTwiceDaily']);

@@ -127,6 +127,7 @@ class DownloadController
         }
         
         $download = download_url($downloadEndpoint);
+
         if (is_wp_error($download)) {
             wp_send_json_error(
               [
