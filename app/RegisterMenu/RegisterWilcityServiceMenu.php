@@ -82,7 +82,7 @@ class RegisterWilcityServiceMenu
         $this->fsMethodNotification();
         $this->saveConfiguration();
         $aConfiguration = wilcityServiceGetConfigFile('settings');
-        do_action('wilcityservice-clients/theme-updates');
+        do_action(WILCITY_SERVICE_PREFIX.'-clients/theme-updates');
         $aValues = get_option(self::$optionKey);
         $aValues = maybe_unserialize($aValues);
         

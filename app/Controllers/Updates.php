@@ -31,10 +31,10 @@ class Updates
 		add_action('admin_init', [$this, 'getUpdates'], 1);
 
 		add_filter('http_request_args', [$this, 'updateCheck'], 5, 2);
-		add_action('wilcityservice-clients/theme-updates', [$this, 'openUpdateForm'], 1);
-		add_action('wilcityservice-clients/theme-updates', [$this, 'showUpTheme']);
-		add_action('wilcityservice-clients/theme-updates', [$this, 'showUpPlugins'], 20);
-		add_action('wilcityservice-clients/theme-updates', [$this, 'closeUpdateForm'], 30);
+		add_action(WILCITYSERVICE_PREFIX . '-clients/theme-updates', [$this, 'openUpdateForm'], 1);
+		add_action(WILCITYSERVICE_PREFIX . '-clients/theme-updates', [$this, 'showUpTheme']);
+		add_action(WILCITYSERVICE_PREFIX . '-clients/theme-updates', [$this, 'showUpPlugins'], 20);
+		add_action(WILCITYSERVICE_PREFIX . '-clients/theme-updates', [$this, 'closeUpdateForm'], 30);
 		add_action('admin_enqueue_scripts', [$this, 'enqueueScripts']);
 
 		add_filter('pre_set_site_transient_update_plugins', [$this, 'updatePlugins']);
@@ -53,14 +53,21 @@ class Updates
 		add_action('after_switch_theme', [$this, 'afterSwitchTheme']);
 		add_action('activated_plugin', [$this, 'afterActivatePlugin']);
 		add_action('admin_init', [$this, 'focusRequestStatistic']);
+//		add_filter('upgrader_clear_destination', [$this, 'overrideUpdatePlugins']);
 		//        add_action('admin_init', [$this, 'testHandleStatistic']);
 	}
+
+	public function overrideUpdatePlugins($response) {
+	    global $current;
+
+	    var_export($current);
+    }
 
 	public function clearUpdatePluginTransients()
 	{
 		global $pagenow;
 		if (($pagenow == 'plugins.php' || $pagenow == 'network-plugins.php' || $pagenow == 'update-core.php' ||
-				$pagenow == 'network-update-core.php') && !General::isWilcityServicePage()
+				$pagenow == 'network-update-core.php') && !General::isServicePage()
 		) {
 			if (get_option('wiloke_clear_update_plugins')) {
 				delete_site_transient('update_plugins');
@@ -221,6 +228,7 @@ class Updates
 		if ($hasUpdate) {
 			$oListPluginsInfo->last_checked = strtotime('+30 minutes');
 			set_site_transient('update_plugins', $oListPluginsInfo);
+			set_site_transient('wiloke_update_plugins', $oListPluginsInfo, time() + 3600);
 			update_option('wiloke_clear_update_plugins', true);
 			$this->setLastCheckedUpdatePlugins();
 		}
@@ -271,7 +279,7 @@ class Updates
 
 	public function checkUpdatePluginDirectly()
 	{
-		if (!General::isWilcityServicePage() || !$this->isNeededToRecheckUpdatePlugins()) {
+		if (!General::isServicePage() || !$this->isNeededToRecheckUpdatePlugins()) {
 			return false;
 		}
 
@@ -320,7 +328,7 @@ class Updates
 	public function getUpdates()
 	{
 		global $pagenow;
-		if (General::isWilcityServicePage() ||
+		if (General::isServicePage() ||
 			($pagenow == 'plugins.php' || $pagenow == 'network-plugins.php' || $pagenow == 'update-core.php' ||
 				$pagenow == 'network-update-core.php')
 		) {
@@ -431,7 +439,7 @@ class Updates
 
 	public function updateThemes($oTransient)
 	{
-		if (General::isWilcityServicePage()) {
+		if (General::isServicePage()) {
 			return $oTransient;
 		}
 
@@ -460,7 +468,7 @@ class Updates
 
 	public function updatePlugins($oTransient)
 	{
-		if (General::isWilcityServicePage()) {
+		if (General::isServicePage()) {
 			return $oTransient;
 		}
 
@@ -487,7 +495,7 @@ class Updates
 
 	public function enqueueScripts()
 	{
-		if (!General::isWilcityServicePage()) {
+		if (!General::isServicePage()) {
 			return false;
 		}
 
@@ -512,7 +520,8 @@ class Updates
 			case 'INVALID_TOKEN':
 				?>
                 <div class="ui message negative">
-                    Invalid Token. Please log into <a href="https://wilcityservice.com" target="_blank">Wilcity
+                    Invalid Token. Please log into <a href="<?php echo esc_url(WILCITYSERVICE_WEBSITE); ?>"
+                                                      target="_blank">Wilcity
                         Service</a> to renew one.
                 </div>
 				<?php

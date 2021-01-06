@@ -10,7 +10,7 @@ class VerifyLicenseController
 {
 	public function __construct()
 	{
-		add_action('wiloke_service_daily_event', [$this, 'verifyLicense']);
+		add_action(WILCITYSERVICE_PREFIX.'_daily_event', [$this, 'verifyLicense']);
 		add_action('admin_init', [$this, 'focusVerify'], 99);
 	}
 

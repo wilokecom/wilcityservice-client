@@ -102,6 +102,7 @@ class RestApi
 				'msg'    => 'The Secret Token is required'
 			];
 		}
+
 		$curl = curl_init();
 		curl_setopt_array($curl, [
 			CURLOPT_URL            => self::$baseURL . $endpoint,
@@ -122,6 +123,8 @@ class RestApi
 		$response = curl_exec($curl);
 		$error = curl_error($curl);
 		curl_close($curl);
+
+
 		if ($error) {
 			return [
 				'status' => 'error',

@@ -11,7 +11,7 @@ class PluginController
 	public function __construct()
 	{
 		add_action('admin_init', [$this, 'focusStatistic'], 99);
-		add_action('wiloke_service_daily_event', [$this, 'registerRouter']);
+		add_action(WILCITYSERVICE_PREFIX.'_daily_event', [$this, 'registerRouter']);
 	}
 
 	public function focusStatistic()

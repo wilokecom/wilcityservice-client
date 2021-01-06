@@ -16,7 +16,6 @@ class DownloadController
         add_action('wp_ajax_wiloke_activate_plugin', [$this, 'activatePlugin']);
         add_action('wp_ajax_wiloke_deactivate_plugin', [$this, 'deactivatePlugin']);
         add_action('upgrader_package_options', [$this, 'addBearTokenToDownloadURL']);
-        //        add_filter('wp_signature_hosts', [$this, 'addSignatureHosts']);
         $this->setPaths();
     }
     
@@ -32,13 +31,6 @@ class DownloadController
         }
         
         return $aOptions;
-    }
-    
-    public function addSignatureHosts($aHosts)
-    {
-        $aHosts[] = 'wilcityservice.com';
-        
-        return $aHosts;
     }
     
     private function setPaths()

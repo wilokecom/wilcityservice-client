@@ -4,7 +4,7 @@ namespace WilcityServiceClient\Helpers;
 use function Sodium\compare;
 
 class General {
-	public static function isWilcityServicePage(){
+	public static function isServicePage(){
 		if ( !is_admin() || !isset($_GET['page']) || $_GET['page'] !== 'wilcity-service' ){
 			return false;
 		}

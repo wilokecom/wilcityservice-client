@@ -8,10 +8,10 @@ class NotificationController extends Controller
 {
     public function __construct()
     {
-        add_action('wilcityservice_hourly_event', [$this, 'fetchNotifications']);
+        add_action(WILCITYSERVICE_PREFIX.'_hourly_event', [$this, 'fetchNotifications']);
         add_action('admin_init', [$this, 'updateReadStatus']);
         add_action('admin_head', [$this, 'addColorToNotificationIcon']);
-        add_action('wilcityservice-clients/theme-updates', [$this, 'renderNotifications']);
+        add_action(WILCITYSERVICE_PREFIX.'-clients/theme-updates', [$this, 'renderNotifications']);
         add_action('admin_init', [$this, 'focusFetchNotifications']);
     }
     

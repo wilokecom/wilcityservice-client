@@ -6,7 +6,7 @@ class Shortcodes
 {
     public function __construct()
     {
-        add_shortcode('wilcityservice_link', [$this, 'renderLink']);
+        add_shortcode(WILCITYSERVICE_PREFIX.'_link', [$this, 'renderLink']);
     }
     
     public function renderLink($aAtts, $content)
