@@ -3,7 +3,7 @@
  * Plugin Name: Wilcity Service Client
  * Plugin URI: https://wilcityservice.com/
  * Description: Wilcity Service
- * Version: 1.1.8
+ * Version: 1.1.9
  * Author: Wiloke
  * Author URI: https://wiloke.com
  * Text Domain: wilcityservice
@@ -18,7 +18,7 @@ use WilcityServiceClient\Controllers\VerifyLicenseController;
 define('WILCITYSERIVCE_CLIENT_DIR', plugin_dir_path(__FILE__));
 define('WILCITYSERIVCE_CLIENT_SOURCE', plugin_dir_url(__FILE__) . 'source/');
 define('WILCITYSERIVCE_CLIENT_ASSSETS', plugin_dir_url(__FILE__) . 'assets/');
-define('WILCITYSERIVCE_VERSION', '1.1.8');
+define('WILCITYSERIVCE_VERSION', '1.1.9');
 define('WILCITYSERVICE_PREVIEWURL', 'https://wilcity.com');
 define('WILCITYSERVICE_THEME_ENDPOIN', 'themes/wilcity');
 define('WILCITY_UPDATE_PORT', 'http://localhost:8888/wilcityservice/');

@@ -18,7 +18,7 @@ class PremiumPlugin
 			return false;
 		}
 
-		return isset($aExpiredPlugins['plugins'][$pluginName]) ? $aExpiredPlugins['plugins'][$pluginName] : false;
+		return $aExpiredPlugins['plugins'][$pluginName] ?? false;
 	}
 
 	public static function getExpiryMsg($pluginName)
