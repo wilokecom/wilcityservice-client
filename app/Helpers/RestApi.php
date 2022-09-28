@@ -78,7 +78,7 @@ class RestApi
 			}
 
 			$aResponse = json_decode($response, true);
-			if ($aResponse['status'] == 'error') {
+			if (!$aResponse || $aResponse['status'] == 'error') {
 				return $aResponse;
 			}
 
